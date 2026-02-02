@@ -1,31 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ABR Ownership Panel</title>
-
+    <title>ABR Ownership Panel</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<link rel="stylesheet" href="style.css">
 <body>
+    <h1>ABR – Ownership Panel</h1>
+    
+    <form id="ownerForm">
+        <label>Update Type:</label>
+        <select id="type">
+            <option>📢 Announcement</option>
+            <option>📊 Score Update</option>
+            <option>📝 General Note</option>
+        </select>
 
-<h1>ABR – Ownership Panel</h1>
+        <label>Your Message:</label>
+        <textarea id="message" placeholder="Type your update here..." required></textarea>
 
-<form name="abr-posts" method="POST" data-netlify="true">
-  <input type="hidden" name="form-name" value="abr-posts">
+        <button type="submit" id="btn">Publish to Board</button>
+    </form>
 
-  <label>Type:</label>
-  <select name="type">
-    <option>Announcement</option>
-    <option>Score</option>
-    <option>Note</option>
-  </select>
+    <p class="warn">⚠️ This panel is for Ownership only.</p>
 
-  <label>Message:</label>
-  <textarea name="message" required></textarea>
+    <script>
+        const form = document.getElementById('ownerForm');
+        const btn = document.getElementById('btn');
 
-  <button type="submit">Post</button>
-</form>
+        form.addEventListener("submit", e => {
+            e.preventDefault();
+            btn.innerText = "Publishing...";
+            btn.disabled = true;
 
-<p class="warn">⚠️ This panel is for Ownership only.</p>
-
+            // PASTE YOUR SHEETDB LINK BELOW
+            fetch('https://sheetdb.io/api/v1/nsqoeik98h24t', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    data: [{
+                        type: document.getElementById('type').value,
+                        message: document.getElementById('message').value,
+                        date: new Date().toLocaleString()
+                    }]
+                })
+            })
+            .then(res => {
+                alert("Success! Leadership can now see this when they refresh.");
+                form.reset();
+                btn.innerText = "Publish to Board";
+                btn.disabled = false;
+            });
+        });
+    </script>
 </body>
 </html>
