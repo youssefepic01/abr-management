@@ -1,0 +1,166 @@
+/* ===== Global Reset ===== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ===== Body ===== */
+body {
+  background: radial-gradient(circle at top, #0b1220, #020617);
+  color: #e5e7eb;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  padding: 40px;
+  min-height: 100vh;
+}
+
+/* ===== Container ===== */
+body > * {
+  max-width: 900px;
+  margin: auto;
+}
+
+/* ===== Headings ===== */
+h1 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+  color: #38bdf8;
+  letter-spacing: 0.5px;
+}
+
+h1::after {
+  content: "";
+  display: block;
+  width: 80px;
+  height: 4px;
+  margin-top: 8px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #38bdf8, #6366f1);
+}
+
+/* ===== Subtext / Notices ===== */
+.warn {
+  margin-top: 20px;
+  padding: 12px 16px;
+  background: rgba(248, 113, 113, 0.12);
+  border-left: 4px solid #f87171;
+  color: #fecaca;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+/* ===== Form Card ===== */
+form {
+  margin-top: 30px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+/* ===== Labels ===== */
+label {
+  display: block;
+  margin-bottom: 6px;
+  margin-top: 20px;
+  font-weight: 600;
+  color: #c7d2fe;
+  letter-spacing: 0.3px;
+}
+
+/* ===== Inputs & Select ===== */
+select,
+textarea {
+  width: 100%;
+  padding: 14px 16px;
+  background: #020617;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 12px;
+  color: #e5e7eb;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+select:hover,
+textarea:hover {
+  border-color: #38bdf8;
+}
+
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 140px;
+}
+
+/* ===== Button ===== */
+button {
+  margin-top: 28px;
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #020617;
+  background: linear-gradient(135deg, #38bdf8, #6366f1);
+  box-shadow:
+    0 10px 30px rgba(56, 189, 248, 0.35);
+  transition: all 0.25s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 18px 40px rgba(99, 102, 241, 0.45);
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow:
+    0 8px 20px rgba(99, 102, 241, 0.35);
+}
+
+/* ===== Ownership Badge ===== */
+body::before {
+  content: "OWNERSHIP ACCESS";
+  position: fixed;
+  top: 18px;
+  right: 20px;
+  padding: 6px 12px;
+  font-size: 0.7rem;
+  letter-spacing: 1.5px;
+  font-weight: 800;
+  color: #020617;
+  background: linear-gradient(135deg, #facc15, #f59e0b);
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(250, 204, 21, 0.35);
+}
+
+/* ===== Smooth Animation ===== */
+form,
+.warn,
+h1 {
+  animation: fadeUp 0.6s ease forwards;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
