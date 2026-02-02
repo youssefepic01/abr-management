@@ -1,94 +1,65 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>RP Admin Console</title>
+    <title>Ownership Dashboard</title>
     <style>
-        body { background: #020617; color: white; font-family: sans-serif; padding: 20px; }
-        .card { background: #1e293b; padding: 20px; border-radius: 12px; max-width: 500px; margin: 0 auto 20px; border: 1px solid #334155; }
-        h2 { margin-top: 0; color: #38bdf8; font-size: 1.2rem; }
+        body { background: #020617; color: white; font-family: sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .menu { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 500px; margin-bottom: 20px; }
+        .menu-btn { padding: 20px; background: #1e293b; border: 1px solid #38bdf8; color: white; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .menu-btn:hover { background: #38bdf8; color: #020617; }
+        .card { background: #1e293b; padding: 20px; border-radius: 12px; width: 100%; max-width: 500px; border: 1px solid #334155; display: none; }
         input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #2563eb; border: none; color: white; font-weight: bold; cursor: pointer; border-radius: 8px; }
-        .strike-btn { background: #dc2626; }
+        .save-btn { background: #2563eb; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .active { display: block; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h2>📢 Send Announcement</h2>
-        <form id="msgForm">
-            <input type="text" id="mType" placeholder="Type (Announcement/Update)">
-            <textarea id="mText" placeholder="Message content..." required></textarea>
-            <button type="submit">Publish</button>
-        </form>
+    <h1>👑 Ownership Panel</h1>
+
+    <div class="menu">
+        <button class="menu-btn" onclick="show('ann')">📢 Send Announcement</button>
+        <button class="menu-btn" onclick="show('staff')">👥 Add Staff</button>
+        <button class="menu-btn" onclick="show('strike')">⚖️ Issue Strike</button>
+        <button class="menu-btn" onclick="window.location.href='/view'">🌐 View Public Site</button>
     </div>
 
-    <div class="card">
-        <h2>👥 Add Staff</h2>
-        <form id="staffForm">
-            <input type="text" id="sName" placeholder="Username" required>
-            <input type="text" id="sRole" placeholder="Role">
-            <button type="submit">Save Staff</button>
-        </form>
+    <div id="ann" class="card">
+        <h2>Post Announcement</h2>
+        <input type="text" id="mType" placeholder="Title">
+        <textarea id="mText" placeholder="Message..."></textarea>
+        <button class="save-btn" onclick="send('Sheet1', {type:mType.value, message:mText.value, date:new Date().toLocaleString()})">Publish</button>
     </div>
 
-    <div class="card">
-        <h2>⚖️ Issue Strike</h2>
-        <form id="strikeForm">
-            <input type="text" id="strName" placeholder="Staff Username" required>
-            <select id="strLevel">
-                <option value="S1">S1 (Warning)</option>
-                <option value="S2">S2 (Minor)</option>
-                <option value="S3">S3 (Major)</option>
-                <option value="S4">S4 (Termination)</option>
-            </select>
-            <textarea id="strReason" placeholder="Reason..." required></textarea>
-            <button type="submit" class="strike-btn">Issue Strike</button>
-        </form>
+    <div id="staff" class="card">
+        <h2>Add New Staff</h2>
+        <input type="text" id="sName" placeholder="Username">
+        <input type="text" id="sRole" placeholder="Rank">
+        <button class="save-btn" onclick="send('staff', {name:sName.value, role:sRole.value})">Save Staff</button>
+    </div>
+
+    <div id="strike" class="card">
+        <h2>Issue Strike</h2>
+        <input type="text" id="stName" placeholder="Staff Username">
+        <select id="stLvl"><option>S1</option><option>S2</option><option>S3</option><option>S4</option></select>
+        <textarea id="stReason" placeholder="Reason"></textarea>
+        <button class="save-btn" style="background:#dc2626" onclick="send('strikes', {name:stName.value, strike_level:stLvl.value, reason:stReason.value})">Confirm Strike</button>
     </div>
 
     <script>
-        const API = 'https://sheetdb.io/api/v1/nsqoeik98h24t';
-
-        // Helper function to talk to Google Sheets
-        async function sendToSheet(sheetName, payload) {
-            const btn = event.submitter;
-            btn.innerText = "Processing...";
-            await fetch('https://sheetdb.io/api/v1/nsqoeik98h24t?sheet=' + sheetName, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ data: [payload] })
-            });
-            alert("Success!");
-            location.reload();
+        const API = 'https://sheetdb.io/api/v1/nsqoeik98h24';
+        function show(id) {
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
         }
-
-        document.getElementById('msgForm').onsubmit = e => {
-            e.preventDefault();
-            sendToSheet('Sheet1', { 
-                type: document.getElementById('mType').value, 
-                message: document.getElementById('mText').value, 
-                date: new Date().toLocaleString() 
+        async function send(sheet, data) {
+            await fetch(API+'?sheet='+sheet, {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({data:[data]})
             });
-        };
-
-        document.getElementById('staffForm').onsubmit = e => {
-            e.preventDefault();
-            sendToSheet('staff', { 
-                name: document.getElementById('sName').value, 
-                role: document.getElementById('sRole').value, 
-                date_added: new Date().toLocaleDateString() 
-            });
-        };
-
-        document.getElementById('strikeForm').onsubmit = e => {
-            e.preventDefault();
-            sendToSheet('strikes', { 
-                name: document.getElementById('strName').value, 
-                strike_level: document.getElementById('strLevel').value, 
-                reason: document.getElementById('strReason').value,
-                date: new Date().toLocaleString()
-            });
-        };
+            alert("Success!"); location.reload();
+        }
     </script>
 </body>
 </html>
