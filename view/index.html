@@ -1,20 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>ABR Management Board</title>
+    <title>ABR Management Board</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <h1>ABR – Management Board</h1>
+    <p>Announcements and official updates from Ownership.</p>
 
-<h1>ABR – Management Board</h1>
+    <div id="updates-container">
+        <p>Loading updates...</p>
+    </div>
 
-<p>Announcements and official updates from Ownership.</p>
+    <script>
+        // PASTE YOUR SHEETDB LINK BELOW
+        fetch('https://sheetdb.io/api/v1/nsqoeik98h24t')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('updates-container');
+                container.innerHTML = ""; // Clear the loading text
 
-<!-- Netlify will show submissions in dashboard -->
-<p class="info">
-Updates are published by Ownership only.<br>
-Leadership & Management have view-only access.
-</p>
+                if(data.length === 0) {
+                    container.innerHTML = "<p>No updates yet.</p>";
+                    return;
+                }
 
+                // Show newest posts at the top
+                data.reverse().forEach(post => {
+                    const card = document.createElement('div');
+                    card.style.background = "rgba(255,255,255,0.05)";
+                    card.style.padding = "15px";
+                    card.style.marginBottom = "15px";
+                    card.style.borderRadius = "8px";
+                    card.style.borderLeft = "4px solid #38bdf8";
+                    
+                    card.innerHTML = `
+                        <div style="color: #38bdf8; font-weight: bold; margin-bottom: 5px;">${post.type}</div>
+                        <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 10px;">${post.date}</div>
+                        <div style="line-height: 1.5;">${post.message}</div>
+                    `;
+                    container.appendChild(card);
+                });
+            });
+    </script>
 </body>
 </html>
