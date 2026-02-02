@@ -1,103 +1,94 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>ABR Owner Panel</title>
+    <title>RP Admin Console</title>
     <style>
-        body { background: #020617; color: white; font-family: sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .card { background: #1e293b; padding: 20px; border-radius: 12px; width: 100%; max-width: 500px; margin-bottom: 25px; border: 1px solid #334155; }
-        h2 { color: #38bdf8; margin-top: 0; }
-        input, textarea, select { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 8px; box-sizing: border-box; margin-bottom: 12px; }
-        button { width: 100%; padding: 12px; background: #38bdf8; border: none; border-radius: 8px; color: #020617; font-weight: bold; cursor: pointer; }
-        .staff-item { background: #0f172a; padding: 10px; border-radius: 8px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155; }
-        .del-btn { background: #ef4444; color: white; width: auto; padding: 5px 10px; font-size: 11px; }
+        body { background: #020617; color: white; font-family: sans-serif; padding: 20px; }
+        .card { background: #1e293b; padding: 20px; border-radius: 12px; max-width: 500px; margin: 0 auto 20px; border: 1px solid #334155; }
+        h2 { margin-top: 0; color: #38bdf8; font-size: 1.2rem; }
+        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #2563eb; border: none; color: white; font-weight: bold; cursor: pointer; border-radius: 8px; }
+        .strike-btn { background: #dc2626; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h2>📢 Post Official Update</h2>
+        <h2>📢 Send Announcement</h2>
         <form id="msgForm">
-            <select id="msgType">
-                <option value="📢 Announcement">Announcement</option>
-                <option value="📊 Score Update">Score Update</option>
-                <option value="📝 General Note">General Note</option>
-            </select>
-            <textarea id="msgText" placeholder="Your message here..." required></textarea>
-            <button type="submit" id="msgBtn">Publish Update</button>
+            <input type="text" id="mType" placeholder="Type (Announcement/Update)">
+            <textarea id="mText" placeholder="Message content..." required></textarea>
+            <button type="submit">Publish</button>
         </form>
     </div>
 
     <div class="card">
-        <h2>👥 Add Staff Member</h2>
+        <h2>👥 Add Staff</h2>
         <form id="staffForm">
-            <input type="text" id="stName" placeholder="Username" required>
-            <input type="number" id="stID" placeholder="User ID" required>
-            <input type="text" id="stRole" placeholder="Role Name" required>
-            <button type="submit" id="staffBtn">Add to Sheet</button>
+            <input type="text" id="sName" placeholder="Username" required>
+            <input type="text" id="sRole" placeholder="Role">
+            <button type="submit">Save Staff</button>
         </form>
     </div>
 
     <div class="card">
-        <h2>🛠️ Manage Staff</h2>
-        <div id="manageList">Loading...</div>
+        <h2>⚖️ Issue Strike</h2>
+        <form id="strikeForm">
+            <input type="text" id="strName" placeholder="Staff Username" required>
+            <select id="strLevel">
+                <option value="S1">S1 (Warning)</option>
+                <option value="S2">S2 (Minor)</option>
+                <option value="S3">S3 (Major)</option>
+                <option value="S4">S4 (Termination)</option>
+            </select>
+            <textarea id="strReason" placeholder="Reason..." required></textarea>
+            <button type="submit" class="strike-btn">Issue Strike</button>
+        </form>
     </div>
 
     <script>
         const API = 'https://sheetdb.io/api/v1/nsqoeik98h24t';
 
-        // POST MESSAGE
+        // Helper function to talk to Google Sheets
+        async function sendToSheet(sheetName, payload) {
+            const btn = event.submitter;
+            btn.innerText = "Processing...";
+            await fetch('https://sheetdb.io/api/v1/nsqoeik98h24t?sheet=' + sheetName, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ data: [payload] })
+            });
+            alert("Success!");
+            location.reload();
+        }
+
         document.getElementById('msgForm').onsubmit = e => {
             e.preventDefault();
-            document.getElementById('msgBtn').innerText = "Sending...";
-            fetch(API + '?sheet=Sheet1', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({data: [{
-                    type: document.getElementById('msgType').value,
-                    message: document.getElementById('msgText').value,
-                    date: new Date().toLocaleString()
-                }]})
-            }).then(() => { alert("Update Sent!"); location.reload(); });
+            sendToSheet('Sheet1', { 
+                type: document.getElementById('mType').value, 
+                message: document.getElementById('mText').value, 
+                date: new Date().toLocaleString() 
+            });
         };
 
-        // ADD STAFF
         document.getElementById('staffForm').onsubmit = e => {
             e.preventDefault();
-            document.getElementById('staffBtn').innerText = "Saving...";
-            fetch(API + '?sheet=staff', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({data: [{
-                    name: document.getElementById('stName').value,
-                    id: document.getElementById('stID').value,
-                    role: document.getElementById('stRole').value,
-                    date_added: new Date().toLocaleDateString()
-                }]})
-            }).then(() => { alert("Staff Saved!"); location.reload(); });
+            sendToSheet('staff', { 
+                name: document.getElementById('sName').value, 
+                role: document.getElementById('sRole').value, 
+                date_added: new Date().toLocaleDateString() 
+            });
         };
 
-        // LOAD STAFF LIST
-        function loadStaff() {
-            fetch('https://sheetdb.io/api/v1/nsqoeik98h24t?sheet=staff').then(res => res.json()).then(data => {
-                const list = document.getElementById('manageList');
-                // Filters out the header row if it accidentally shows up
-                list.innerHTML = data.filter(s => s.name !== 'name').map(s => `
-                    <div class="staff-item">
-                        <div><b>${s.name}</b><br><small>${s.role}</small></div>
-                        <button class="del-btn" onclick="deleteStaff('${s.name}')">Remove</button>
-                    </div>
-                `).join('');
+        document.getElementById('strikeForm').onsubmit = e => {
+            e.preventDefault();
+            sendToSheet('strikes', { 
+                name: document.getElementById('strName').value, 
+                strike_level: document.getElementById('strLevel').value, 
+                reason: document.getElementById('strReason').value,
+                date: new Date().toLocaleString()
             });
-        }
-
-        function deleteStaff(name) {
-            if(confirm("Delete " + name + "?")) {
-                fetch(`${API}/name/${name}?sheet=staff`, { method: 'DELETE' })
-                .then(() => location.reload());
-            }
-        }
-        loadStaff();
+        };
     </script>
 </body>
 </html>
