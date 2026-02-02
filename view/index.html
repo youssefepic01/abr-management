@@ -4,39 +4,49 @@
     <title>ABR Board</title>
     <style>
         body { background: #020617; color: white; font-family: sans-serif; padding: 20px; }
-        .section { max-width: 600px; margin: 0 auto 40px; }
-        .item { background: #1e293b; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #38bdf8; }
-        .staff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .post { background: #1e293b; padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #38bdf8; }
+        .staff-card { background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #f472b6; display: flex; justify-content: space-between; align-items: center; }
+        h1, h2 { color: #38bdf8; border-bottom: 1px solid #334155; padding-bottom: 10px; }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>📢 Recent Updates</h1>
+        <div id="updates">Loading...</div>
 
-    <div class="section">
-        <h2>📢 Latest Updates</h2>
-        <div id="updatesList">Loading...</div>
-    </div>
-
-    <div class="section">
-        <h2>👥 Staff Directory</h2>
-        <div id="staffDisplay" class="staff-grid">Loading...</div>
+        <h2>👥 Staff Database</h2>
+        <div id="staffList">Loading...</div>
     </div>
 
     <script>
-        const baseAPI = 'https://sheetdb.io/api/v1/nsqoeik98h24';
+        const API = 'https://sheetdb.io/api/v1/nsqoeik98h24';
 
-        // Get Updates
-        fetch(baseAPI + '?sheet=Sheet1').then(res => res.json()).then(data => {
-            document.getElementById('updatesList').innerHTML = data.reverse().map(i => `
-                <div class="item"><strong>${i.type}</strong> <small>${i.date}</small><p>${i.message}</p></div>
+        // LOAD MESSAGES (Sheet1)
+        fetch(API + '?sheet=Sheet1').then(res => res.json()).then(data => {
+            const div = document.getElementById('updates');
+            if (data.length === 0) { div.innerHTML = "No updates yet."; return; }
+            div.innerHTML = data.reverse().map(i => `
+                <div class="post">
+                    <strong>${i.type}</strong> <small style="color:#94a3b8">${i.date}</small>
+                    <p style="margin: 10px 0 0;">${i.message}</p>
+                </div>
             `).join('');
         });
 
-        // Get Staff
-        fetch(baseAPI + '?sheet=staff').then(res => res.json()).then(data => {
-            document.getElementById('staffDisplay').innerHTML = data.map(s => `
-                <div class="item" style="border-left-color: #f472b6;">
-                    <b>${s.name}</b><br><small>ID: ${s.id}</small><br>
-                    <span style="color:#f472b6">${s.role}</span>
+        // LOAD STAFF (staff sheet)
+        fetch(API + '?sheet=staff').then(res => res.json()).then(data => {
+            const div = document.getElementById('staffList');
+            // Filter out headers and empty rows
+            const cleanData = data.filter(s => s.name && s.name !== 'name');
+            if (cleanData.length === 0) { div.innerHTML = "No staff members listed."; return; }
+            div.innerHTML = cleanData.map(s => `
+                <div class="staff-card">
+                    <div>
+                        <div style="font-weight:bold;">${s.name}</div>
+                        <div style="font-size:0.8rem; color:#94a3b8">ID: ${s.id}</div>
+                    </div>
+                    <div style="color:#f472b6; font-weight:bold;">${s.role}</div>
                 </div>
             `).join('');
         });
