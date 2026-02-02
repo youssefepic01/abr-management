@@ -15,10 +15,11 @@
         .card { background: #1e293b; padding: 25px; border-radius: 12px; max-width: 600px; display: none; border: 1px solid #334155; margin-bottom: 20px; }
         .card.active { display: block; }
         input, textarea, select { width: 100%; padding: 12px; margin: 10px 0; background: #0b1120; border: 1px solid #334155; color: white; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        button { background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; }
+        button { background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; transition: 0.3s; }
+        button:disabled { background: #475569; cursor: not-allowed; }
         
         .req-card { background: #0b1120; padding: 15px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 15px; }
-        .btn-group { display: flex; gap: 10px; }
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
         .btn-approve { background: #10b981; flex: 1; }
         .btn-deny { background: #ef4444; flex: 1; }
 
@@ -36,14 +37,14 @@
         <div class="nav-item" onclick="show('approvals', this)">📩 Pending Requests</div>
         <div class="nav-item" onclick="show('staff', this)">👥 Add Staff</div>
         <div class="nav-item" onclick="show('strike', this)">⚠️ Issue Strike</div>
-        <div class="nav-item" style="color: #10b981; margin-top: 20px;" onclick="window.location.href='/view/'">🌐 View Public Site</div>
+        <div class="nav-item" style="color: #10b981; margin-top: 20px;" onclick="window.open('../view/', '_blank')">🌐 View Public Site</div>
     </div>
     <div class="main">
         <div id="ann" class="card active">
             <h2>Post Announcement</h2>
-            <input type="text" id="mType" placeholder="Subject">
-            <textarea id="mText" rows="5" placeholder="Message..."></textarea>
-            <button onclick="send('announcements', {type:mType.value, message:mText.value, date:new Date().toLocaleString()})">Publish</button>
+            <input type="text" id="mType" placeholder="Subject (e.g. Promotion, Rule Change)">
+            <textarea id="mText" rows="5" placeholder="Message content..."></textarea>
+            <button id="annBtn" onclick="handleAnnounce()">Publish Announcement</button>
         </div>
 
         <div id="approvals" class="card">
@@ -54,16 +55,22 @@
         <div id="staff" class="card">
             <h2>Add New Staff Member</h2>
             <input type="text" id="sName" placeholder="Username">
-            <input type="text" id="sRole" placeholder="Rank">
-            <button onclick="send('staff', {name:sName.value, role:sRole.value, date_added:new Date().toLocaleDateString()})">Save Staff</button>
+            <input type="text" id="sRole" placeholder="Rank/Position">
+            <button id="staffBtn" onclick="handleStaff()">Save Staff Member</button>
         </div>
 
         <div id="strike" class="card">
             <h2>Issue Strike</h2>
-            <input type="text" id="stName" placeholder="Username">
-            <select id="stLvl"><option>S1</option><option>S2</option><option>S3</option><option>S4</option><option>Verbal Warning</option><option> Warning</option></select>
-            <textarea id="stReason" placeholder="Reason..."></textarea>
-            <button style="background: #ef4444;" onclick="send('strikes', {name:stName.value, strike_level:stLvl.value, reason:stReason.value, date:new Date().toLocaleString()})">Confirm Strike</button>
+            <input type="text" id="stName" placeholder="Staff Username">
+            <select id="stLvl">
+                <option value="Verbal Warning">Verbal Warning</option>
+                <option value="Warning">Warning</option>
+                <option value="S1">Strike 1</option>
+                <option value="S2">Strike 2</option>
+                <option value="S3">Strike 3</option>
+            </select>
+            <textarea id="stReason" placeholder="Reason for disciplinary action..."></textarea>
+            <button id="strikeBtn" style="background: #ef4444;" onclick="handleStrike()">Confirm & Log Strike</button>
         </div>
     </div>
 
@@ -78,53 +85,100 @@
             if(id === 'approvals') loadRequests();
         }
 
-        async function send(sheet, data) {
-            const btn = event.target;
-            btn.innerText = "Sending...";
-            
-            fetch(API, {
+        // Generic Send Function
+        async function apiPost(payload) {
+            return fetch(API, {
                 method: 'POST',
                 mode: 'no-cors',
-                body: JSON.stringify({
-                    sheet: sheet,
-                    values: Object.values(data)
-                })
+                cache: 'no-cache',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
+        }
 
-            setTimeout(() => {
-                alert("Success!");
-                location.reload();
-            }, 1000);
+        // Specific Handlers to prevent data mismatch
+        async function handleAnnounce() {
+            const btn = document.getElementById('annBtn');
+            const data = {
+                sheet: 'announcements',
+                values: [
+                    document.getElementById('mType').value,
+                    document.getElementById('mText').value,
+                    new Date().toLocaleString()
+                ]
+            };
+            btn.disabled = true; btn.innerText = "Publishing...";
+            await apiPost(data);
+            alert("Announcement Live!");
+            location.reload();
+        }
+
+        async function handleStaff() {
+            const btn = document.getElementById('staffBtn');
+            const data = {
+                sheet: 'staff',
+                values: [
+                    document.getElementById('sName').value,
+                    document.getElementById('sRole').value,
+                    new Date().toLocaleDateString()
+                ]
+            };
+            btn.disabled = true; btn.innerText = "Saving...";
+            await apiPost(data);
+            alert("Staff Member Added!");
+            location.reload();
+        }
+
+        async function handleStrike() {
+            const btn = document.getElementById('strikeBtn');
+            const data = {
+                sheet: 'strikes',
+                values: [
+                    document.getElementById('stName').value,
+                    document.getElementById('stLvl').value,
+                    document.getElementById('stReason').value,
+                    new Date().toLocaleString()
+                ]
+            };
+            btn.disabled = true; btn.innerText = "Logging...";
+            await apiPost(data);
+            alert("Strike Issued.");
+            location.reload();
         }
 
         async function loadRequests() {
             const container = document.getElementById('requestList');
-            container.innerHTML = "Fetching...";
+            container.innerHTML = "Fetching pending tasks...";
             try {
                 const res = await fetch(API + '?sheet=requests');
                 const data = await res.json();
-                const pending = data.filter(r => r.status === "PENDING");
+                const pending = data.filter(r => String(r.status).toUpperCase() === "PENDING");
 
-                if (pending.length === 0) {
-                    container.innerHTML = "<p>No pending requests.</p>";
+                if (!pending.length) {
+                    container.innerHTML = "<p style='color: #64748b; text-align: center; margin-top: 20px;'>All clear! No pending requests.</p>";
                     return;
                 }
 
                 container.innerHTML = pending.map(r => `
                     <div class="req-card">
-                        <h3>${r.type || 'Request'}: ${r.name}</h3>
-                        <p><strong>Reason:</strong> ${r.reason}</p>
+                        <div style="font-size: 12px; color: var(--accent); font-weight: bold; text-transform: uppercase;">${r.type}</div>
+                        <h3 style="margin: 5px 0;">${r.name}</h3>
+                        <p style="font-size: 14px; color: #94a3b8; margin: 0;">${r.reason}</p>
                         <div class="btn-group">
                             <button class="btn-approve" onclick="updateReq('${r.name}', 'APPROVED')">Approve</button>
                             <button class="btn-deny" onclick="updateReq('${r.name}', 'DENIED')">Deny</button>
                         </div>
                     </div>
                 `).join('');
-            } catch (e) { container.innerHTML = "Error loading data."; }
+            } catch (e) { 
+                container.innerHTML = "<p style='color: #ef4444;'>Error connecting to database.</p>"; 
+            }
         }
 
         async function updateReq(name, status) {
-            fetch(API, {
+            if(!confirm(`Set status to ${status}?`)) return;
+            
+            await fetch(API, {
                 method: 'POST',
                 mode: 'no-cors',
                 body: JSON.stringify({
@@ -135,10 +189,8 @@
                 })
             });
 
-            setTimeout(() => {
-                alert("Status Updated: " + status);
-                loadRequests();
-            }, 1000);
+            alert("Request updated.");
+            loadRequests();
         }
     </script>
 </body>
