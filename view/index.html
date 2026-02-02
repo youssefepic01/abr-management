@@ -20,7 +20,7 @@
     </div>
 
     <script>
-        const API = 'https://sheetdb.io/api/v1/nsqoeik98h24';
+        const API = 'https://sheetdb.io/api/v1/nsqoeik98h24t';
 
         // LOAD MESSAGES (Sheet1)
         fetch(API + '?sheet=Sheet1').then(res => res.json()).then(data => {
@@ -35,7 +35,8 @@
         });
 
         // LOAD STAFF (staff sheet)
-        fetch(API + '?sheet=staff').then(res => res.json()).then(data => {
+
+        fetch('https://sheetdb.io/api/v1/nsqoeik98h24t?sheet=staff').then(res => res.json()).then(data => {
             const div = document.getElementById('staffList');
             // Filter out headers and empty rows
             const cleanData = data.filter(s => s.name && s.name !== 'name');
