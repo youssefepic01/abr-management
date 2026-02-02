@@ -5,12 +5,13 @@
     <style>
         body { background: #020617; color: white; font-family: sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .menu { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 500px; margin-bottom: 20px; }
-        .menu-btn { padding: 20px; background: #1e293b; border: 1px solid #38bdf8; color: white; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .menu-btn { padding: 20px; background: #1e293b; border: 1px solid #38bdf8; color: white; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.9rem; }
         .menu-btn:hover { background: #38bdf8; color: #020617; }
         .card { background: #1e293b; padding: 20px; border-radius: 12px; width: 100%; max-width: 500px; border: 1px solid #334155; display: none; }
         input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 8px; box-sizing: border-box; }
-        .save-btn { background: #2563eb; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .save-btn { background: #2563eb; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .active { display: block; }
+        h1 { color: #38bdf8; margin-bottom: 30px; }
     </style>
 </head>
 <body>
@@ -21,44 +22,63 @@
         <button class="menu-btn" onclick="show('ann')">📢 Send Announcement</button>
         <button class="menu-btn" onclick="show('staff')">👥 Add Staff</button>
         <button class="menu-btn" onclick="show('strike')">⚖️ Issue Strike</button>
-        <button class="menu-btn" onclick="window.location.href='/view'">🌐 View Public Site</button>
+        <button class="menu-btn" style="border-color: #10b981;" onclick="window.location.href='/view/'">🌐 View Public Site</button>
     </div>
 
     <div id="ann" class="card">
         <h2>Post Announcement</h2>
-        <input type="text" id="mType" placeholder="Title">
-        <textarea id="mText" placeholder="Message..."></textarea>
-        <button class="save-btn" onclick="send('Sheet1', {type:mType.value, message:mText.value, date:new Date().toLocaleString()})">Publish</button>
+        <input type="text" id="mType" placeholder="Title (e.g. Update)">
+        <textarea id="mText" placeholder="Message content..."></textarea>
+        <button class="save-btn" onclick="send('Sheet1', {type:mType.value, message:mText.value, date:new Date().toLocaleString()})">Publish to Website</button>
     </div>
 
     <div id="staff" class="card">
         <h2>Add New Staff</h2>
-        <input type="text" id="sName" placeholder="Username">
-        <input type="text" id="sRole" placeholder="Rank">
-        <button class="save-btn" onclick="send('staff', {name:sName.value, role:sRole.value})">Save Staff</button>
+        <input type="text" id="sName" placeholder="Roblox Username">
+        <input type="text" id="sRole" placeholder="Rank/Role">
+        <button class="save-btn" onclick="send('staff', {name:sName.value, role:sRole.value, date_added:new Date().toLocaleDateString()})">Save to Database</button>
     </div>
 
     <div id="strike" class="card">
-        <h2>Issue Strike</h2>
+        <h2>Issue Staff Strike</h2>
         <input type="text" id="stName" placeholder="Staff Username">
-        <select id="stLvl"><option>S1</option><option>S2</option><option>S3</option><option>S4</option></select>
-        <textarea id="stReason" placeholder="Reason"></textarea>
-        <button class="save-btn" style="background:#dc2626" onclick="send('strikes', {name:stName.value, strike_level:stLvl.value, reason:stReason.value})">Confirm Strike</button>
+        <select id="stLvl">
+            <option>S1</option>
+            <option>S2</option>
+            <option>S3</option>
+            <option>S4</option>
+        </select>
+        <textarea id="stReason" placeholder="Reason for strike..."></textarea>
+        <button class="save-btn" style="background:#dc2626" onclick="send('strikes', {name:stName.value, strike_level:stLvl.value, reason:stReason.value, date:new Date().toLocaleString()})">Confirm Strike</button>
     </div>
 
     <script>
         const API = 'https://sheetdb.io/api/v1/nsqoeik98h24';
+
         function show(id) {
             document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
             document.getElementById(id).classList.add('active');
         }
+
         async function send(sheet, data) {
-            await fetch(API+'?sheet='+sheet, {
-                method:'POST',
-                headers:{'Content-Type':'application/json'},
-                body:JSON.stringify({data:[data]})
-            });
-            alert("Success!"); location.reload();
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = "Sending...";
+            btn.disabled = true;
+
+            try {
+                await fetch(API + '?sheet=' + sheet, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ data: [data] })
+                });
+                alert("Successfully saved to " + sheet + "!");
+                location.reload();
+            } catch (err) {
+                alert("Error saving data.");
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
         }
     </script>
 </body>
