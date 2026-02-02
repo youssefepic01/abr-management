@@ -1,41 +1,91 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Leadership Panel</title>
+    <title>RP Admin | Leadership</title>
     <style>
-        /* Same CSS as above, just changing colors */
-        body { background: #020617; color: white; font-family: sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .menu { display: grid; grid-template-columns: 1fr; gap: 15px; width: 100%; max-width: 400px; }
-        .menu-btn { padding: 15px; background: #1e293b; border: 1px solid #f472b6; color: white; border-radius: 12px; cursor: pointer; font-weight: bold; }
-        .card { background: #1e293b; padding: 20px; border-radius: 12px; width: 100%; max-width: 500px; margin-top: 20px; display: none; border: 1px solid #334155; }
-        .active { display: block; }
-        input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 5px; }
+        :root { --bg: #0b1120; --side: #111827; --accent: #8b5cf6; --text: #94a3b8; }
+        body { margin: 0; display: flex; height: 100vh; background: var(--bg); color: white; font-family: sans-serif; }
+        
+        .sidebar { width: 250px; background: var(--side); padding: 20px; border-right: 1px solid #1e293b; display: flex; flex-direction: column; }
+        .logo { font-weight: bold; font-size: 1.2rem; margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
+        .nav-item { padding: 12px; border-radius: 8px; color: var(--text); cursor: pointer; transition: 0.2s; margin-bottom: 5px; text-decoration: none; }
+        .nav-item:hover { background: #1e293b; color: white; }
+        .nav-item.active { background: var(--accent); color: white; }
+
+        .main { flex: 1; padding: 40px; overflow-y: auto; }
+        .card { background: #1e293b; padding: 25px; border-radius: 12px; max-width: 600px; border: 1px solid #334155; }
+        
+        input, textarea, select { width: 100%; padding: 12px; margin: 10px 0; background: #0b1120; border: 1px solid #334155; color: white; border-radius: 6px; box-sizing: border-box; }
+        button { background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
 <body>
 
-    <h1>👮 Leadership Panel</h1>
-
-    <div class="menu">
-        <button class="menu-btn" onclick="window.location.href='/view'">📋 View Staff & Announcements</button>
-        <button class="menu-btn" onclick="show('strikeBox')">⚖️ Issue a Strike</button>
+    <div class="sidebar">
+        <div class="logo">👮 Leadership</div>
+        <div class="nav-item active">⚖️ Issue Strike</div>
+        <a href="/view/" class="nav-item">📋 View Database</a>
     </div>
 
-    <div id="strikeBox" class="card">
-        <h2>Issue Staff Strike</h2>
-        <input type="text" id="name" placeholder="Staff Name">
-        <select id="lvl"><option>S1</option><option>S2</option><option>S3</option><option>S4</option></select>
-        <textarea id="res" placeholder="Reason"></textarea>
-        <button onclick="send()" style="width:100%; padding:10px; background:#ef4444; color:white; border:none; border-radius:5px; font-weight:bold;">SUBMIT STRIKE</button>
+    <div class="main">
+        <div id="strikeBox" class="card">
+            <h2>Issue Staff Strike</h2>
+            <p style="color: var(--text); font-size: 0.9rem;">Submit a strike to the database. This will appear on the public logs.</p>
+            
+            <input type="text" id="stName" placeholder="Staff Username">
+            
+            <label style="font-size: 0.8rem; color: var(--text);">Strike Level</label>
+            <select id="stLvl">
+                <option>S1</option>
+                <option>S2</option>
+                <option>S3</option>
+                <option>S4</option>
+            </select>
+            
+            <textarea id="stReason" rows="4" placeholder="Reason for this strike..."></textarea>
+            
+            <button id="subBtn" onclick="submitStrike()">SUBMIT STRIKE</button>
+        </div>
     </div>
 
     <script>
-        const API = 'https://sheetdb.io/api/v1/nsqoeik98h24?sheet=strikes';
-        function show(id) { document.getElementById(id).classList.toggle('active'); }
-        async function send() {
-            const data = { name: document.getElementById('name').value, strike_level: document.getElementById('lvl').value, reason: document.getElementById('res').value, date: new Date().toLocaleDateString() };
-            await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({data:[data]}) });
-            alert("Strike Logged."); location.reload();
+        const API = 'https://sheetdb.io/api/v1/nsqoeik98h24t?sheet=strikes';
+
+        async function submitStrike() {
+            const name = document.getElementById('stName').value;
+            const lvl = document.getElementById('stLvl').value;
+            const reason = document.getElementById('stReason').value;
+            const btn = document.getElementById('subBtn');
+
+            if(!name || !reason) return alert("Please fill in all fields.");
+
+            btn.innerText = "Logging to Sheets...";
+            btn.disabled = true;
+
+            const data = {
+                name: name,
+                strike_level: lvl,
+                reason: reason,
+                date: new Date().toLocaleString()
+            };
+
+            try {
+                const response = await fetch(API, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ data: [data] })
+                });
+                
+                if(response.ok) {
+                    alert("Strike successfully logged!");
+                    location.reload();
+                }
+            } catch (err) {
+                alert("Error: Could not connect to database.");
+                btn.innerText = "SUBMIT STRIKE";
+                btn.disabled = false;
+            }
         }
     </script>
 </body>
