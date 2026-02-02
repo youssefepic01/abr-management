@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>RP Admin | Ownership</title>
+    <title>RP Admin | Leadership</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        :root { --bg: #0b1120; --side: #111827; --accent: #3b82f6; --text: #94a3b8; }
+        :root { --bg: #0b1120; --side: #111827; --accent: #8b5cf6; --text: #94a3b8; }
         body { margin: 0; display: flex; height: 100vh; background: var(--bg); color: white; font-family: sans-serif; }
         .sidebar { width: 250px; background: var(--side); padding: 20px; border-right: 1px solid #1e293b; display: flex; flex-direction: column; flex-shrink: 0; }
         .logo { font-weight: bold; font-size: 1.2rem; margin-bottom: 30px; color: var(--accent); }
@@ -12,7 +12,7 @@
         .nav-item:hover { background: #1e293b; color: white; }
         .nav-item.active { background: var(--accent); color: white; }
         .main { flex: 1; padding: 40px; overflow-y: auto; }
-        .card { background: #1e293b; padding: 25px; border-radius: 12px; max-width: 600px; display: none; border: 1px solid #334155; }
+        .card { background: #1e293b; padding: 25px; border-radius: 12px; max-width: 600px; border: 1px solid #334155; display: none; }
         .card.active { display: block; }
         input, textarea, select { width: 100%; padding: 12px; margin: 10px 0; background: #0b1120; border: 1px solid #334155; color: white; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
         button { background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; }
@@ -26,51 +26,93 @@
 </head>
 <body>
     <div class="sidebar">
-        <div class="logo">🛡️ Owner Panel</div>
-        <div class="nav-item active" onclick="show('ann', this)">📢 Announcement</div>
-        <div class="nav-item" onclick="show('staff', this)">👥 Add Staff</div>
-        <div class="nav-item" onclick="show('strike', this)">⚠️ Issue Strike</div>
-        <div class="nav-item" style="color: #10b981; margin-top: 20px;" onclick="window.location.href='/view/'">🌐 View Public Site</div>
+        <div class="logo">👮 Leadership</div>
+        <div id="navStrike" class="nav-item active" onclick="showTab('strikeTab', this)">⚖️ Issue Strike</div>
+        <div id="navRequest" class="nav-item" onclick="showTab('requestTab', this)">📩 Request Action</div>
+        <div class="nav-item" onclick="window.location.href='/view/'">📋 View Database</div>
     </div>
+
     <div class="main">
-        <div id="ann" class="card active">
-            <h2>Post Announcement</h2>
-            <input type="text" id="mType" placeholder="Subject">
-            <textarea id="mText" rows="5" placeholder="Message..."></textarea>
-            <button onclick="send('Sheet1', {type:mType.value, message:mText.value, date:new Date().toLocaleString()})">Publish</button>
+        <div id="strikeTab" class="card active">
+            <h2>Issue Staff Strike</h2>
+            <input type="text" id="target" placeholder="Staff Username">
+            <select id="lvl">
+                <option>Verbal Warning</option>
+                <option>S1</option>
+                <option>S2</option>
+                <option>S3</option>
+                <option>S4</option>
+            </select>
+            <textarea id="res" rows="4" placeholder="Reason..."></textarea>
+            <button id="subBtn" onclick="sendStrike()">SUBMIT STRIKE</button>
         </div>
-        <div id="staff" class="card">
-            <h2>Add New Staff Member</h2>
-            <input type="text" id="sName" placeholder="Username">
-            <input type="text" id="sRole" placeholder="Rank">
-            <button onclick="send('staff', {name:sName.value, role:sRole.value, date_added:new Date().toLocaleDateString()})">Save Staff</button>
-        </div>
-        <div id="strike" class="card">
-            <h2>Issue Strike</h2>
-            <input type="text" id="stName" placeholder="Username">
-            <select id="stLvl"><option>S1</option><option>S2</option><option>S3</option><option>S4</option></select>
-            <textarea id="stReason" placeholder="Reason..."></textarea>
-            <button style="background: #ef4444;" onclick="send('strikes', {name:stName.value, strike_level:stLvl.value, reason:stReason.value, date:new Date().toLocaleString()})">Confirm Strike</button>
+
+        <div id="requestTab" class="card">
+            <h2>Request Action (Owner Approval)</h2>
+            <p style="color: #94a3b8; font-size: 0.8rem; margin-top: -10px;">Requires Owner review</p>
+            <input type="text" id="reqTarget" placeholder="Staff Username">
+            <select id="reqType">
+                <option value="Demotion">Demotion</option>
+                <option value="Firing">Firing</option>
+                <option value="Promotion">Promotion</option>
+            </select>
+            <textarea id="reqRes" rows="4" placeholder="Reason for this request..."></textarea>
+            <button id="reqBtn" onclick="sendRequest()" style="background: #ec4899;">SEND REQUEST</button>
         </div>
     </div>
+
     <script>
-        const API = 'https://sheetdb.io/api/v1/nsqoeik98h24t';
-        function show(id, el) {
+        const API_BASE = 'https://sheetdb.io/api/v1/nsqoeik98h24t';
+
+        // Tab Switching Logic
+        function showTab(tabId, el) {
             document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
             el.classList.add('active');
         }
-        async function send(sheet, data) {
-            const btn = event.target; btn.innerText = "Sending...";
+
+        // Send Strike (Direct to Strikes Sheet)
+        async function sendStrike() {
+            const btn = document.getElementById('subBtn');
+            btn.innerText = "Saving...";
+            const data = { 
+                name: document.getElementById('target').value, 
+                strike_level: document.getElementById('lvl').value, 
+                reason: document.getElementById('res').value, 
+                date: new Date().toLocaleString() 
+            };
             try {
-                await fetch(API + '?sheet=' + sheet, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ data: [data] })
+                await fetch(API_BASE + '?sheet=strikes', { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({ data: [data] }) 
                 });
-                alert("Success!"); location.reload();
-            } catch (e) { alert("Error."); btn.innerText = "Try Again"; }
+                alert("Strike/Warning Logged!"); 
+                location.reload();
+            } catch (err) { alert("Error."); btn.innerText = "SUBMIT STRIKE"; }
+        }
+
+        // Send Request (To Requests Sheet for Approval)
+        async function sendRequest() {
+            const btn = document.getElementById('reqBtn');
+            btn.innerText = "Sending...";
+            const data = { 
+                name: document.getElementById('reqTarget').value, 
+                type: document.getElementById('reqType').value, 
+                reason: document.getElementById('reqRes').value, 
+                status: "PENDING",
+                date: new Date().toLocaleString() 
+            };
+            try {
+                await fetch(API_BASE + '?sheet=requests', { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({ data: [data] }) 
+                });
+                alert("Request sent to Ownership!"); 
+                location.reload();
+            } catch (err) { alert("Error."); btn.innerText = "SEND REQUEST"; }
         }
     </script>
 </body>
