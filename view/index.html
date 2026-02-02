@@ -1,4 +1,4 @@
-7<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <title>RP Admin | Public Logs</title>
@@ -9,6 +9,7 @@
         .sidebar { width: 250px; background: var(--side); padding: 20px; border-right: 1px solid #1e293b; flex-shrink: 0; }
         .logo { font-weight: bold; font-size: 1.2rem; margin-bottom: 30px; color: var(--accent); }
         .nav-item { padding: 12px; border-radius: 8px; color: var(--text); cursor: pointer; transition: 0.2s; margin-bottom: 5px; }
+        .nav-item:hover { background: #1e293b; color: white; }
         .nav-item.active { background: var(--accent); color: white; }
         .main { flex: 1; padding: 40px; overflow-y: auto; }
         .section { display: none; }
@@ -51,23 +52,45 @@
         </div>
     </div>
     <script>
-        const API = 'https://formspree.io/f/mrelrada';
+        const API = 'https://script.google.com/macros/s/AKfycbyGipapObdry9qy39Zj1vY2_gRKRLm9KIDNqclRishFkhaBAutKVlcTYuuVPwnIpTwvyQ/exec';
+
         function showSection(id, el) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             el.classList.add('active');
         }
+
         async function loadData() {
             try {
-                const a = await fetch(API+'?sheet=Sheet1'); const aD = await a.json();
-                document.getElementById('annContent').innerHTML = aD.reverse().map(i => `<div class="announcement-card"><h3>${i.type}</h3><p>${i.message}</p></div>`).join('');
-                const s = await fetch(API+'?sheet=staff'); const sD = await s.json();
-                document.getElementById('staffContent').innerHTML = sD.map(i => `<tr><td>${i.name}</td><td>${i.role}</td></tr>`).join('');
-                const st = await fetch(API+'?sheet=strikes'); const stD = await st.json();
-                document.getElementById('strikeContent').innerHTML = stD.reverse().map(i => `<tr><td>${i.name}</td><td>${i.strike_level}</td><td>${i.reason}</td></tr>`).join('');
-            } catch (e) {}
+                // 1. Load Announcements
+                const a = await fetch(API + '?sheet=announcements');
+                const aD = await a.json();
+                document.getElementById('annContent').innerHTML = aD.length ? aD.reverse().map(i => `
+                    <div class="announcement-card">
+                        <h3>${i.type || 'Announcement'}</h3>
+                        <p>${i.message || i.content || ''}</p>
+                        <small style="color: #64748b">${i.date || ''}</small>
+                    </div>`).join('') : "No announcements yet.";
+
+                // 2. Load Staff
+                const s = await fetch(API + '?sheet=staff');
+                const sD = await s.json();
+                document.getElementById('staffContent').innerHTML = sD.length ? sD.map(i => `
+                    <tr><td>${i.name}</td><td>${i.role}</td></tr>`).join('') : "<tr><td colspan='2'>No staff found.</td></tr>";
+
+                // 3. Load Strikes
+                const st = await fetch(API + '?sheet=strikes');
+                const stD = await st.json();
+                document.getElementById('strikeContent').innerHTML = stD.length ? stD.reverse().map(i => `
+                    <tr><td>${i.name}</td><td>${i.strike_level}</td><td>${i.reason}</td></tr>`).join('') : "<tr><td colspan='3'>No logs found.</td></tr>";
+
+            } catch (e) {
+                console.error(e);
+                document.getElementById('annContent').innerHTML = "Error loading data. Make sure your Google Sheet tabs are named correctly.";
+            }
         }
+
         loadData();
     </script>
 </body>
