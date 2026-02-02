@@ -1,47 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ABR Management Board</title>
-    <link rel="stylesheet" href="style.css">
+    <title>ABR Leadership View</title>
+    <style>
+        body { background: #020617; color: white; font-family: sans-serif; padding: 20px; }
+        .section { max-width: 600px; margin: 0 auto 40px; }
+        .post, .staff-item { background: #1e293b; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #38bdf8; }
+        .staff-item { border-left-color: #f472b6; display: flex; justify-content: space-between; }
+        h2 { border-bottom: 1px solid #334155; padding-bottom: 10px; }
+    </style>
 </head>
 <body>
-    <h1>ABR – Management Board</h1>
-    <p>Announcements and official updates from Ownership.</p>
 
-    <div id="updates-container">
-        <p>Loading updates...</p>
+    <div class="section">
+        <h2>📢 Recent Updates</h2>
+        <div id="updates">Loading...</div>
+    </div>
+
+    <div class="section">
+        <h2>👥 Staff Database</h2>
+        <div id="staffList">Loading...</div>
     </div>
 
     <script>
-        // PASTE YOUR SHEETDB LINK BELOW
-        fetch('https://sheetdb.io/api/v1/nsqoeik98h24t')
-            .then(response => response.json())
-            .then(data => {
-                const container = document.getElementById('updates-container');
-                container.innerHTML = ""; // Clear the loading text
+        const API = 'https://sheetdb.io/api/v1/nsqoeik98h24t';
 
-                if(data.length === 0) {
-                    container.innerHTML = "<p>No updates yet.</p>";
-                    return;
-                }
+        // Load Updates
+        fetch(API).then(res => res.json()).then(data => {
+            document.getElementById('updates').innerHTML = data.reverse().map(i => `
+                <div class="post"><strong>${i.type}</strong> <small>${i.date}</small><p>${i.message}</p></div>
+            `).join('');
+        });
 
-                // Show newest posts at the top
-                data.reverse().forEach(post => {
-                    const card = document.createElement('div');
-                    card.style.background = "rgba(255,255,255,0.05)";
-                    card.style.padding = "15px";
-                    card.style.marginBottom = "15px";
-                    card.style.borderRadius = "8px";
-                    card.style.borderLeft = "4px solid #38bdf8";
-                    
-                    card.innerHTML = `
-                        <div style="color: #38bdf8; font-weight: bold; margin-bottom: 5px;">${post.type}</div>
-                        <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 10px;">${post.date}</div>
-                        <div style="line-height: 1.5;">${post.message}</div>
-                    `;
-                    container.appendChild(card);
-                });
-            });
+        // Load Staff
+        fetch("https://sheetdb.io/api/v1/nsqoeik98h24t?sheet=staff").then(res => res.json()).then(data => {
+            document.getElementById('staffList').innerHTML = data.map(s => `
+                <div class="staff-item"><span>${s.name}</span> <b style="color:#f472b6">${s.role}</b></div>
+            `).join('');
+        });
     </script>
 </body>
 </html>
