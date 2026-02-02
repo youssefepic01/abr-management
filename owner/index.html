@@ -1,103 +1,65 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ABR Ownership Panel</title>
+    <title>ABR Owner Panel</title>
     <style>
-        /* This is the CSS inside the HTML so it never breaks! */
-        body {
-            background: radial-gradient(circle at top, #0b1220, #020617);
-            color: #e5e7eb;
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-        h1 { color: #38bdf8; text-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
-        form {
-            background: rgba(255, 255, 255, 0.03);
-            padding: 30px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            width: 100%;
-            max-width: 400px;
-            backdrop-filter: blur(10px);
-        }
-        label { display: block; margin-bottom: 8px; font-weight: 600; color: #94a3b8; }
-        select, textarea {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            border: 1px solid #334155;
-            background: #1e293b;
-            color: white;
-            box-sizing: border-box;
-        }
-        button {
-            width: 100%;
-            padding: 14px;
-            background: #38bdf8;
-            color: #020617;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        button:hover { background: #7dd3fc; transform: translateY(-2px); }
-        button:disabled { background: #64748b; cursor: not-allowed; }
+        body { background: #020617; color: white; font-family: sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .card { background: #1e293b; padding: 20px; border-radius: 12px; width: 100%; max-width: 450px; margin-bottom: 30px; border: 1px solid #334155; }
+        h2 { color: #38bdf8; margin-top: 0; }
+        label { display: block; margin: 10px 0 5px; color: #94a3b8; }
+        input, select, textarea { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #38bdf8; border: none; border-radius: 6px; color: #020617; font-weight: bold; margin-top: 15px; cursor: pointer; }
+        button:hover { background: #7dd3fc; }
     </style>
 </head>
 <body>
-    <h1>ABR Ownership Panel</h1>
-    
-    <form id="ownerForm">
-        <label>Update Type</label>
-        <select id="type">
-            <option>📢 Announcement</option>
-            <option>📊 Score Update</option>
-            <option>📝 General Note</option>
-        </select>
 
-        <label>Message</label>
-        <textarea id="message" rows="5" placeholder="What's the update?" required></textarea>
+    <div class="card">
+        <h2>📢 Post Official Update</h2>
+        <form id="updateForm">
+            <label>Type</label>
+            <select id="upType"><option>Announcement</option><option>Score</option></select>
+            <label>Message</label>
+            <textarea id="upMsg" required></textarea>
+            <button type="submit" id="btn1">Publish Update</button>
+        </form>
+    </div>
 
-        <button type="submit" id="btn">Publish Update</button>
-    </form>
+    <div class="card">
+        <h2>👥 Add Staff Member</h2>
+        <form id="staffForm">
+            <label>Name</label>
+            <input type="text" id="stName" required>
+            <label>Role</label>
+            <select id="stRole"><option>Admin</option><option>Moderator</option><option>Developer</option></select>
+            <button type="submit" id="btn2">Add Staff</button>
+        </form>
+    </div>
 
     <script>
-        const form = document.getElementById('ownerForm');
-        const btn = document.getElementById('btn');
+        const API = 'https://sheetdb.io/api/v1/nsqoeik98h24t';
 
-        form.addEventListener("submit", e => {
+        // Script for Updates
+        document.getElementById('updateForm').onsubmit = e => {
             e.preventDefault();
-            btn.innerText = "Publishing...";
-            btn.disabled = true;
-
-            // Replace the link below with your SheetDB API URL
-            fetch('https://sheetdb.io/api/v1/nsqoeik98h24t', {
+            document.getElementById('btn1').innerText = "Sending...";
+            fetch(API, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    data: [{
-                        type: document.getElementById('type').value,
-                        message: document.getElementById('message').value,
-                        date: new Date().toLocaleString()
-                    }]
-                })
-            })
-            .then(res => {
-                alert("Success! The board has been updated.");
-                form.reset();
-                btn.innerText = "Publish Update";
-                btn.disabled = false;
-            });
-        });
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({data: [{type: document.getElementById('upType').value, message: document.getElementById('upMsg').value, date: new Date().toLocaleString()}]})
+            }).then(() => { alert("Update Posted!"); location.reload(); });
+        };
+
+        // Script for Staff Database
+        document.getElementById('staffForm').onsubmit = e => {
+            e.preventDefault();
+            document.getElementById('btn2').innerText = "Adding...";
+            fetch("https://sheetdb.io/api/v1/nsqoeik98h24t?sheet=staff", {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({data: [{name: document.getElementById('stName').value, role: document.getElementById('stRole').value, date_added: new Date().toLocaleDateString()}]})
+            }).then(() => { alert("Staff Added!"); location.reload(); });
+        };
     </script>
 </body>
 </html>
