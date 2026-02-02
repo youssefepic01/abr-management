@@ -17,7 +17,6 @@
         input, textarea, select { width: 100%; padding: 12px; margin: 10px 0; background: #0b1120; border: 1px solid #334155; color: white; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
         button { background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; }
         
-        /* Styles for the Approval Cards */
         .req-card { background: #0b1120; padding: 15px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 15px; }
         .btn-group { display: flex; gap: 10px; }
         .btn-approve { background: #10b981; flex: 1; }
@@ -44,7 +43,7 @@
             <h2>Post Announcement</h2>
             <input type="text" id="mType" placeholder="Subject">
             <textarea id="mText" rows="5" placeholder="Message..."></textarea>
-            <button onclick="send('Sheet1', {type:mType.value, message:mText.value, date:new Date().toLocaleString()})">Publish</button>
+            <button onclick="send('announcements', {type:mType.value, message:mText.value, date:new Date().toLocaleString()})">Publish</button>
         </div>
 
         <div id="approvals" class="card">
@@ -69,7 +68,7 @@
     </div>
 
     <script>
-        const API = 'https://formspree.io/f/mrelrada';
+        const API = 'https://script.google.com/macros/s/AKfycbyGipapObdry9qy39Zj1vY2_gRKRLm9KIDNqclRishFkhaBAutKVlcTYuuVPwnIpTwvyQ/exec';
 
         function show(id, el) {
             document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
@@ -80,21 +79,27 @@
         }
 
         async function send(sheet, data) {
-            const btn = event.target; btn.innerText = "Sending...";
-            try {
-                await fetch(API + '?sheet=' + sheet, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ data: [data] })
-                });
-                alert("Success!"); location.reload();
-            } catch (e) { alert("Error."); btn.innerText = "Try Again"; }
+            const btn = event.target;
+            btn.innerText = "Sending...";
+            
+            fetch(API, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({
+                    sheet: sheet,
+                    values: Object.values(data)
+                })
+            });
+
+            setTimeout(() => {
+                alert("Success!");
+                location.reload();
+            }, 1000);
         }
 
-        // --- APPROVAL LOGIC ---
         async function loadRequests() {
             const container = document.getElementById('requestList');
-            container.innerHTML = "Fetching from database...";
+            container.innerHTML = "Fetching...";
             try {
                 const res = await fetch(API + '?sheet=requests');
                 const data = await res.json();
@@ -107,33 +112,34 @@
 
                 container.innerHTML = pending.map(r => `
                     <div class="req-card">
-                        <h3>${r.type}: ${r.name}</h3>
+                        <h3>${r.type || 'Request'}: ${r.name}</h3>
                         <p><strong>Reason:</strong> ${r.reason}</p>
-                        <p><small>${r.date}</small></p>
                         <div class="btn-group">
                             <button class="btn-approve" onclick="updateReq('${r.name}', 'APPROVED')">Approve</button>
                             <button class="btn-deny" onclick="updateReq('${r.name}', 'DENIED')">Deny</button>
                         </div>
                     </div>
                 `).join('');
-            } catch (e) { container.innerHTML = "Error loading requests."; }
+            } catch (e) { container.innerHTML = "Error loading data."; }
         }
 
         async function updateReq(name, status) {
-            try {
-                // Find row by name in the requests sheet and update status
-                await fetch(`${API}/name/${name}?sheet=requests`, {
-                    method: 'PATCH',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ data: { status: status } })
-                });
-                alert("Action: " + status);
-                loadRequests();
-            } catch (e) { alert("Update failed."); }
-        }
+            fetch(API, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({
+                    sheet: 'requests',
+                    action: 'update',
+                    name: name,
+                    status: status
+                })
+            });
 
-        // Auto-load approvals if that's the active tab
-        loadRequests();
+            setTimeout(() => {
+                alert("Status Updated: " + status);
+                loadRequests();
+            }, 1000);
+        }
     </script>
 </body>
 </html>
