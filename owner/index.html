@@ -1,78 +1,76 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Ownership Dashboard</title>
+    <title>RP Admin | Ownership</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { background: #020617; color: white; font-family: sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .menu { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; max-width: 500px; margin-bottom: 20px; }
-        .menu-btn { padding: 20px; background: #1e293b; border: 1px solid #38bdf8; color: white; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.3s; font-size: 0.9rem; }
-        .menu-btn:hover { background: #38bdf8; color: #020617; }
-        .card { background: #1e293b; padding: 20px; border-radius: 12px; width: 100%; max-width: 500px; border: 1px solid #334155; display: none; }
-        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 8px; box-sizing: border-box; }
-        .save-btn { background: #2563eb; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .active { display: block; }
-        h1 { color: #38bdf8; margin-bottom: 30px; }
+        :root { --bg: #0b1120; --side: #111827; --accent: #3b82f6; --text: #94a3b8; }
+        body { margin: 0; display: flex; height: 100vh; background: var(--bg); color: white; font-family: sans-serif; }
+        .sidebar { width: 250px; background: var(--side); padding: 20px; border-right: 1px solid #1e293b; display: flex; flex-direction: column; flex-shrink: 0; }
+        .logo { font-weight: bold; font-size: 1.2rem; margin-bottom: 30px; color: var(--accent); }
+        .nav-item { padding: 12px; border-radius: 8px; color: var(--text); cursor: pointer; transition: 0.2s; margin-bottom: 5px; }
+        .nav-item:hover { background: #1e293b; color: white; }
+        .nav-item.active { background: var(--accent); color: white; }
+        .main { flex: 1; padding: 40px; overflow-y: auto; }
+        .card { background: #1e293b; padding: 25px; border-radius: 12px; max-width: 600px; display: none; border: 1px solid #334155; }
+        .card.active { display: block; }
+        input, textarea, select { width: 100%; padding: 12px; margin: 10px 0; background: #0b1120; border: 1px solid #334155; color: white; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        button { background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; }
+        
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid #1e293b; box-sizing: border-box; }
+            .main { padding: 20px; }
+        }
     </style>
 </head>
 <body>
-
-    <h1>👑 Ownership Panel</h1>
-
-    <div class="menu">
-        <button class="menu-btn" onclick="show('ann')">📢 Send Announcement</button>
-        <button class="menu-btn" onclick="show('staff')">👥 Add Staff</button>
-        <button class="menu-btn" onclick="show('strike')">⚖️ Issue Strike</button>
-        <button class="menu-btn" style="border-color: #10b981;" onclick="window.location.href='/view/'">🌐 View Public Site</button>
+    <div class="sidebar">
+        <div class="logo">🛡️ Owner Panel</div>
+        <div class="nav-item active" onclick="show('ann', this)">📢 Announcement</div>
+        <div class="nav-item" onclick="show('staff', this)">👥 Add Staff</div>
+        <div class="nav-item" onclick="show('strike', this)">⚠️ Issue Strike</div>
+        <div class="nav-item" style="color: #10b981; margin-top: 20px;" onclick="window.location.href='/view/'">🌐 View Public Site</div>
     </div>
-
-    <div id="ann" class="card">
-        <h2>Post Announcement</h2>
-        <input type="text" id="mType" placeholder="Title (e.g. Update)">
-        <textarea id="mText" placeholder="Message content..."></textarea>
-        <button class="save-btn" onclick="send('Sheet1', {type:mType.value, message:mText.value, date:new Date().toLocaleString()})">Publish to Website</button>
+    <div class="main">
+        <div id="ann" class="card active">
+            <h2>Post Announcement</h2>
+            <input type="text" id="mType" placeholder="Subject">
+            <textarea id="mText" rows="5" placeholder="Message..."></textarea>
+            <button onclick="send('Sheet1', {type:mType.value, message:mText.value, date:new Date().toLocaleString()})">Publish</button>
+        </div>
+        <div id="staff" class="card">
+            <h2>Add New Staff Member</h2>
+            <input type="text" id="sName" placeholder="Username">
+            <input type="text" id="sRole" placeholder="Rank">
+            <button onclick="send('staff', {name:sName.value, role:sRole.value, date_added:new Date().toLocaleDateString()})">Save Staff</button>
+        </div>
+        <div id="strike" class="card">
+            <h2>Issue Strike</h2>
+            <input type="text" id="stName" placeholder="Username">
+            <select id="stLvl"><option>S1</option><option>S2</option><option>S3</option><option>S4</option></select>
+            <textarea id="stReason" placeholder="Reason..."></textarea>
+            <button style="background: #ef4444;" onclick="send('strikes', {name:stName.value, strike_level:stLvl.value, reason:stReason.value, date:new Date().toLocaleString()})">Confirm Strike</button>
+        </div>
     </div>
-
-    <div id="staff" class="card">
-        <h2>Add New Staff</h2>
-        <input type="text" id="sName" placeholder="Roblox Username">
-        <input type="text" id="sRole" placeholder="Rank/Role">
-        <button class="save-btn" onclick="send('staff', {name:sName.value, role:sRole.value, date_added:new Date().toLocaleDateString()})">Save to Database</button>
-    </div>
-
-    <div id="strike" class="card">
-        <h2>Issue Staff Strike</h2>
-        <input type="text" id="stName" placeholder="Staff Username">
-        <select id="stLvl"><option>S1</option><option>S2</option><option>S3</option><option>S4</option></select>
-        <textarea id="stReason" placeholder="Reason for strike..."></textarea>
-        <button class="save-btn" style="background:#dc2626" onclick="send('strikes', {name:stName.value, strike_level:stLvl.value, reason:stReason.value, date:new Date().toLocaleString()})">Confirm Strike</button>
-    </div>
-
     <script>
-        const API = 'https://sheetdb.io/api/v1/nsqoeik98h24t'; // Updated API
-
-        function show(id) {
+        const API = 'https://sheetdb.io/api/v1/nsqoeik98h24t';
+        function show(id, el) {
             document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(id).classList.add('active');
+            el.classList.add('active');
         }
-
         async function send(sheet, data) {
-            const btn = event.target;
-            btn.innerText = "Sending...";
-            btn.disabled = true;
-
+            const btn = event.target; btn.innerText = "Sending...";
             try {
                 await fetch(API + '?sheet=' + sheet, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ data: [data] })
                 });
-                alert("Successfully saved!");
-                location.reload();
-            } catch (err) {
-                alert("Error saving data.");
-                btn.innerText = "Try Again";
-                btn.disabled = false;
-            }
+                alert("Success!"); location.reload();
+            } catch (e) { alert("Error."); btn.innerText = "Try Again"; }
         }
     </script>
 </body>
