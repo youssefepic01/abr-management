@@ -2,101 +2,72 @@
 <html>
 <head>
     <title>RP Admin | Public Logs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         :root { --bg: #0b1120; --side: #111827; --accent: #10b981; --text: #94a3b8; }
         body { margin: 0; display: flex; height: 100vh; background: var(--bg); color: white; font-family: sans-serif; }
-        
-        .sidebar { width: 250px; background: var(--side); padding: 20px; border-right: 1px solid #1e293b; }
+        .sidebar { width: 250px; background: var(--side); padding: 20px; border-right: 1px solid #1e293b; flex-shrink: 0; }
         .logo { font-weight: bold; font-size: 1.2rem; margin-bottom: 30px; color: var(--accent); }
         .nav-item { padding: 12px; border-radius: 8px; color: var(--text); cursor: pointer; transition: 0.2s; margin-bottom: 5px; }
-        .nav-item:hover { background: #1e293b; color: white; }
         .nav-item.active { background: var(--accent); color: white; }
-
         .main { flex: 1; padding: 40px; overflow-y: auto; }
         .section { display: none; }
         .section.active { display: block; }
-        
-        table { width: 100%; border-collapse: collapse; background: #1e293b; border-radius: 8px; overflow: hidden; }
-        th { background: #334155; text-align: left; padding: 15px; color: var(--accent); }
-        td { padding: 15px; border-bottom: 1px solid #334155; color: #e2e8f0; }
+        table { width: 100%; border-collapse: collapse; background: #1e293b; border-radius: 8px; min-width: 500px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #334155; }
+        .table-wrap { overflow-x: auto; border-radius: 8px; }
         .announcement-card { background: #1e293b; padding: 20px; border-radius: 12px; border-left: 4px solid var(--accent); margin-bottom: 15px; }
-        .date { font-size: 0.8rem; color: var(--text); }
+        
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid #1e293b; box-sizing: border-box; }
+            .main { padding: 20px; }
+        }
     </style>
 </head>
 <body>
-
     <div class="sidebar">
         <div class="logo">📋 Public Logs</div>
         <div class="nav-item active" onclick="showSection('announcements', this)">📢 Announcements</div>
         <div class="nav-item" onclick="showSection('staffList', this)">👥 Staff Team</div>
         <div class="nav-item" onclick="showSection('strikeLogs', this)">⚖️ Strike Logs</div>
     </div>
-
     <div class="main">
         <div id="announcements" class="section active">
             <h1>Latest Announcements</h1>
-            <div id="annContent">Loading announcements...</div>
+            <div id="annContent">Loading...</div>
         </div>
-
         <div id="staffList" class="section">
-            <h1>Official Staff Team</h1>
-            <table>
-                <thead><tr><th>Name</th><th>Rank</th><th>Joined</th></tr></thead>
-                <tbody id="staffContent"></tbody>
-            </table>
+            <h1>Staff Team</h1>
+            <div class="table-wrap">
+                <table><thead><tr><th>Name</th><th>Rank</th></tr></thead><tbody id="staffContent"></tbody></table>
+            </div>
         </div>
-
         <div id="strikeLogs" class="section">
             <h1>Disciplinary Logs</h1>
-            <table>
-                <thead><tr><th>Staff Name</th><th>Level</th><th>Reason</th><th>Date</th></tr></thead>
-                <tbody id="strikeContent"></tbody>
-            </table>
+            <div class="table-wrap">
+                <table><thead><tr><th>Name</th><th>Level</th><th>Reason</th></tr></thead><tbody id="strikeContent"></tbody></table>
+            </div>
         </div>
     </div>
-
     <script>
         const API = 'https://sheetdb.io/api/v1/nsqoeik98h24t';
-
         function showSection(id, el) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             el.classList.add('active');
         }
-
         async function loadData() {
             try {
-                // Fetch Announcements
-                const annRes = await fetch(API + '?sheet=Sheet1');
-                const annData = await annRes.json();
-                document.getElementById('annContent').innerHTML = annData.reverse().map(item => `
-                    <div class="announcement-card">
-                        <div class="date">${item.date}</div>
-                        <h3>${item.type}</h3>
-                        <p>${item.message}</p>
-                    </div>
-                `).join('');
-
-                // Fetch Staff
-                const staffRes = await fetch(API + '?sheet=staff');
-                const staffData = await staffRes.json();
-                document.getElementById('staffContent').innerHTML = staffData.map(s => `
-                    <tr><td>${s.name}</td><td>${s.role}</td><td>${s.date_added}</td></tr>
-                `).join('');
-
-                // Fetch Strikes
-                const strikeRes = await fetch(API + '?sheet=strikes');
-                const strikeData = await strikeRes.json();
-                document.getElementById('strikeContent').innerHTML = strikeData.reverse().map(s => `
-                    <tr><td>${s.name}</td><td><b>${s.strike_level}</b></td><td>${s.reason}</td><td>${s.date}</td></tr>
-                `).join('');
-
-            } catch (err) {
-                console.error("Failed to load data");
-            }
+                const a = await fetch(API+'?sheet=Sheet1'); const aD = await a.json();
+                document.getElementById('annContent').innerHTML = aD.reverse().map(i => `<div class="announcement-card"><h3>${i.type}</h3><p>${i.message}</p></div>`).join('');
+                const s = await fetch(API+'?sheet=staff'); const sD = await s.json();
+                document.getElementById('staffContent').innerHTML = sD.map(i => `<tr><td>${i.name}</td><td>${i.role}</td></tr>`).join('');
+                const st = await fetch(API+'?sheet=strikes'); const stD = await st.json();
+                document.getElementById('strikeContent').innerHTML = stD.reverse().map(i => `<tr><td>${i.name}</td><td>${i.strike_level}</td><td>${i.reason}</td></tr>`).join('');
+            } catch (e) {}
         }
-
         loadData();
     </script>
 </body>
