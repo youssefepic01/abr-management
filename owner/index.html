@@ -1,27 +1,74 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ABR Ownership Panel</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* This is the CSS inside the HTML so it never breaks! */
+        body {
+            background: radial-gradient(circle at top, #0b1220, #020617);
+            color: #e5e7eb;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 { color: #38bdf8; text-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
+        form {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 400px;
+            backdrop-filter: blur(10px);
+        }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #94a3b8; }
+        select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: #1e293b;
+            color: white;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #38bdf8;
+            color: #020617;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover { background: #7dd3fc; transform: translateY(-2px); }
+        button:disabled { background: #64748b; cursor: not-allowed; }
+    </style>
 </head>
 <body>
-    <h1>ABR – Ownership Panel</h1>
+    <h1>ABR Ownership Panel</h1>
     
     <form id="ownerForm">
-        <label>Update Type:</label>
+        <label>Update Type</label>
         <select id="type">
             <option>📢 Announcement</option>
             <option>📊 Score Update</option>
             <option>📝 General Note</option>
         </select>
 
-        <label>Your Message:</label>
-        <textarea id="message" placeholder="Type your update here..." required></textarea>
+        <label>Message</label>
+        <textarea id="message" rows="5" placeholder="What's the update?" required></textarea>
 
-        <button type="submit" id="btn">Publish to Board</button>
+        <button type="submit" id="btn">Publish Update</button>
     </form>
-
-    <p class="warn">⚠️ This panel is for Ownership only.</p>
 
     <script>
         const form = document.getElementById('ownerForm');
@@ -32,7 +79,7 @@
             btn.innerText = "Publishing...";
             btn.disabled = true;
 
-            // PASTE YOUR SHEETDB LINK BELOW
+            // Replace the link below with your SheetDB API URL
             fetch('https://sheetdb.io/api/v1/nsqoeik98h24t', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -45,9 +92,9 @@
                 })
             })
             .then(res => {
-                alert("Success! Leadership can now see this when they refresh.");
+                alert("Success! The board has been updated.");
                 form.reset();
-                btn.innerText = "Publish to Board";
+                btn.innerText = "Publish Update";
                 btn.disabled = false;
             });
         });
