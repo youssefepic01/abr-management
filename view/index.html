@@ -1,35 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ABR Staff Directory</title>
+    <title>ABR Board</title>
     <style>
         body { background: #020617; color: white; font-family: sans-serif; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; }
-        .staff-card { background: #1e293b; padding: 15px; border-radius: 10px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #38bdf8; }
-        .role-badge { background: #38bdf8; color: #020617; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
-        .id-text { color: #94a3b8; font-size: 0.8rem; }
+        .section { max-width: 600px; margin: 0 auto 40px; }
+        .item { background: #1e293b; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #38bdf8; }
+        .staff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>👥 Official Staff Directory</h1>
-        <div id="displayList">Loading staff database...</div>
+
+    <div class="section">
+        <h2>📢 Latest Updates</h2>
+        <div id="updatesList">Loading...</div>
+    </div>
+
+    <div class="section">
+        <h2>👥 Staff Directory</h2>
+        <div id="staffDisplay" class="staff-grid">Loading...</div>
     </div>
 
     <script>
-        const API = 'https://sheetdb.io/api/v1/nsqoeik98h24?sheet=staff';
+        const baseAPI = 'https://sheetdb.io/api/v1/nsqoeik98h24';
 
-        fetch(API).then(res => res.json()).then(data => {
-            const display = document.getElementById('displayList');
-            if(data.length === 0) { display.innerHTML = "No staff currently registered."; return; }
-            
-            display.innerHTML = data.map(s => `
-                <div class="staff-card">
-                    <div>
-                        <div style="font-weight: bold; font-size: 1.1rem;">${s.name}</div>
-                        <div class="id-text">User ID: ${s.id}</div>
-                    </div>
-                    <div class="role-badge">${s.role}</div>
+        // Get Updates
+        fetch(baseAPI + '?sheet=Sheet1').then(res => res.json()).then(data => {
+            document.getElementById('updatesList').innerHTML = data.reverse().map(i => `
+                <div class="item"><strong>${i.type}</strong> <small>${i.date}</small><p>${i.message}</p></div>
+            `).join('');
+        });
+
+        // Get Staff
+        fetch(baseAPI + '?sheet=staff').then(res => res.json()).then(data => {
+            document.getElementById('staffDisplay').innerHTML = data.map(s => `
+                <div class="item" style="border-left-color: #f472b6;">
+                    <b>${s.name}</b><br><small>ID: ${s.id}</small><br>
+                    <span style="color:#f472b6">${s.role}</span>
                 </div>
             `).join('');
         });
