@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leadership Panel</title>
+    <style>
+        /* Same CSS as above, just changing colors */
+        body { background: #020617; color: white; font-family: sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .menu { display: grid; grid-template-columns: 1fr; gap: 15px; width: 100%; max-width: 400px; }
+        .menu-btn { padding: 15px; background: #1e293b; border: 1px solid #f472b6; color: white; border-radius: 12px; cursor: pointer; font-weight: bold; }
+        .card { background: #1e293b; padding: 20px; border-radius: 12px; width: 100%; max-width: 500px; margin-top: 20px; display: none; border: 1px solid #334155; }
+        .active { display: block; }
+        input, textarea, select { width: 100%; padding: 10px; margin: 5px 0; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+    <h1>👮 Leadership Panel</h1>
+
+    <div class="menu">
+        <button class="menu-btn" onclick="window.location.href='/view'">📋 View Staff & Announcements</button>
+        <button class="menu-btn" onclick="show('strikeBox')">⚖️ Issue a Strike</button>
+    </div>
+
+    <div id="strikeBox" class="card">
+        <h2>Issue Staff Strike</h2>
+        <input type="text" id="name" placeholder="Staff Name">
+        <select id="lvl"><option>S1</option><option>S2</option><option>S3</option><option>S4</option></select>
+        <textarea id="res" placeholder="Reason"></textarea>
+        <button onclick="send()" style="width:100%; padding:10px; background:#ef4444; color:white; border:none; border-radius:5px; font-weight:bold;">SUBMIT STRIKE</button>
+    </div>
+
+    <script>
+        const API = 'https://sheetdb.io/api/v1/nsqoeik98h24?sheet=strikes';
+        function show(id) { document.getElementById(id).classList.toggle('active'); }
+        async function send() {
+            const data = { name: document.getElementById('name').value, strike_level: document.getElementById('lvl').value, reason: document.getElementById('res').value, date: new Date().toLocaleDateString() };
+            await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({data:[data]}) });
+            alert("Strike Logged."); location.reload();
+        }
+    </script>
+</body>
+</html>
