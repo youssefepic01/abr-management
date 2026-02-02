@@ -62,7 +62,7 @@
         <div id="strike" class="card">
             <h2>Issue Strike</h2>
             <input type="text" id="stName" placeholder="Username">
-            <select id="stLvl"><option>S1</option><option>S2</option><option>S3</option><option>S4</option></select>
+            <select id="stLvl"><option>S1</option><option>S2</option><option>S3</option><option>S4</option><option>Verbal Warning</option><option> Warning</option></select>
             <textarea id="stReason" placeholder="Reason..."></textarea>
             <button style="background: #ef4444;" onclick="send('strikes', {name:stName.value, strike_level:stLvl.value, reason:stReason.value, date:new Date().toLocaleString()})">Confirm Strike</button>
         </div>
