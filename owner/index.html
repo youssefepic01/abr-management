@@ -2,15 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ABR Owner Control Center</title>
+    <title>ABR Owner Panel</title>
     <style>
-        body { background: #020617; color: white; font-family: 'Segoe UI', sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        body { background: #020617; color: white; font-family: sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .card { background: #1e293b; padding: 20px; border-radius: 12px; width: 100%; max-width: 500px; margin-bottom: 25px; border: 1px solid #334155; }
-        h2 { color: #38bdf8; margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+        h2 { color: #38bdf8; margin-top: 0; }
         input, textarea, select { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 8px; box-sizing: border-box; margin-bottom: 12px; }
         button { width: 100%; padding: 12px; background: #38bdf8; border: none; border-radius: 8px; color: #020617; font-weight: bold; cursor: pointer; }
-        button:hover { background: #7dd3fc; }
-        .staff-item { background: #0f172a; padding: 10px; border-radius: 8px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .staff-item { background: #0f172a; padding: 10px; border-radius: 8px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155; }
         .del-btn { background: #ef4444; color: white; width: auto; padding: 5px 10px; font-size: 11px; }
     </style>
 </head>
@@ -20,12 +19,12 @@
         <h2>📢 Post Official Update</h2>
         <form id="msgForm">
             <select id="msgType">
-                <option>📢 Announcement</option>
-                <option>📊 Score Update</option>
-                <option>📝 General Note</option>
+                <option value="📢 Announcement">Announcement</option>
+                <option value="📊 Score Update">Score Update</option>
+                <option value="📝 General Note">General Note</option>
             </select>
-            <textarea id="msgText" placeholder="Type message here..." required></textarea>
-            <button type="submit" id="msgBtn">Publish to View Page</button>
+            <textarea id="msgText" placeholder="Your message here..." required></textarea>
+            <button type="submit" id="msgBtn">Publish Update</button>
         </form>
     </div>
 
@@ -34,25 +33,24 @@
         <form id="staffForm">
             <input type="text" id="stName" placeholder="Username" required>
             <input type="number" id="stID" placeholder="User ID" required>
-            <input type="text" id="stRole" placeholder="Role (Type anything)" required>
-            <button type="submit" id="staffBtn">Add to Database</button>
+            <input type="text" id="stRole" placeholder="Role Name" required>
+            <button type="submit" id="staffBtn">Add to Sheet</button>
         </form>
     </div>
 
     <div class="card">
         <h2>🛠️ Manage Staff</h2>
-        <div id="manageList">Loading staff...</div>
+        <div id="manageList">Loading...</div>
     </div>
 
     <script>
-        const baseAPI = 'https://sheetdb.io/api/v1/nsqoeik98h24';
+        const API = 'https://sheetdb.io/api/v1/nsqoeik98h24';
 
-        // 1. POST MESSAGE (To Sheet1)
+        // POST MESSAGE
         document.getElementById('msgForm').onsubmit = e => {
             e.preventDefault();
-            const btn = document.getElementById('msgBtn');
-            btn.innerText = "Publishing...";
-            fetch(baseAPI + '?sheet=Sheet1', {
+            document.getElementById('msgBtn').innerText = "Sending...";
+            fetch(API + '?sheet=Sheet1', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({data: [{
@@ -60,15 +58,14 @@
                     message: document.getElementById('msgText').value,
                     date: new Date().toLocaleString()
                 }]})
-            }).then(() => { alert("Update Published!"); location.reload(); });
+            }).then(() => { alert("Update Sent!"); location.reload(); });
         };
 
-        // 2. ADD STAFF (To staff tab)
+        // ADD STAFF
         document.getElementById('staffForm').onsubmit = e => {
             e.preventDefault();
-            const btn = document.getElementById('staffBtn');
-            btn.innerText = "Adding...";
-            fetch(baseAPI + '?sheet=staff', {
+            document.getElementById('staffBtn').innerText = "Saving...";
+            fetch(API + '?sheet=staff', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({data: [{
@@ -77,30 +74,29 @@
                     role: document.getElementById('stRole').value,
                     date_added: new Date().toLocaleDateString()
                 }]})
-            }).then(() => { alert("Staff Added!"); location.reload(); });
+            }).then(() => { alert("Staff Saved!"); location.reload(); });
         };
 
-        // 3. LOAD STAFF LIST
+        // LOAD STAFF LIST
         function loadStaff() {
-            fetch(baseAPI + '?sheet=staff').then(res => res.json()).then(data => {
+            fetch(API + '?sheet=staff').then(res => res.json()).then(data => {
                 const list = document.getElementById('manageList');
-                list.innerHTML = data.map(s => `
+                // Filters out the header row if it accidentally shows up
+                list.innerHTML = data.filter(s => s.name !== 'name').map(s => `
                     <div class="staff-item">
-                        <div><b>${s.name}</b> <br><small>${s.role}</small></div>
-                        <button class="del-btn" onclick="deleteStaff('${s.name}')">Delete</button>
+                        <div><b>${s.name}</b><br><small>${s.role}</small></div>
+                        <button class="del-btn" onclick="deleteStaff('${s.name}')">Remove</button>
                     </div>
                 `).join('');
             });
         }
 
-        // 4. DELETE STAFF
         function deleteStaff(name) {
-            if(confirm("Remove " + name + "?")) {
-                fetch(`${baseAPI}/name/${name}?sheet=staff`, { method: 'DELETE' })
+            if(confirm("Delete " + name + "?")) {
+                fetch(`${API}/name/${name}?sheet=staff`, { method: 'DELETE' })
                 .then(() => location.reload());
             }
         }
-
         loadStaff();
     </script>
 </body>
