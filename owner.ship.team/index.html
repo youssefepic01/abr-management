@@ -1,414 +1,188 @@
 <!DOCTYPE html>
-
 <html>
-
 <head>
-
-    <title>RP Admin | Ownership (Demo)</title>
-
+    <title>Owner Panel | Management</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <style>
-
-        :root { --bg: #0b1120; --side: #111827; --accent: #3b82f6; --text: #94a3b8; --demo: #f59e0b; }
-
-        body { margin: 0; display: flex; height: 100vh; background: var(--bg); color: white; font-family: sans-serif; }
-
-        
-
-        /* Demo Notice Styling */
-
-        .demo-notice { 
-
-            background: var(--demo); 
-
-            color: #000; 
-
-            padding: 10px; 
-
-            font-size: 12px; 
-
-            font-weight: bold; 
-
-            text-align: center; 
-
-            border-radius: 6px; 
-
-            margin-bottom: 20px;
-
-            text-transform: uppercase;
-
-            letter-spacing: 1px;
-
+        :root { 
+            --bg: #0b0e1a; 
+            --side: #111827; 
+            --card-bg: #1e293b; 
+            --accent: #3b82f6; 
+            --text: #94a3b8; 
+            --input: #0f172a;
+            --demo-gold: #f59e0b;
         }
-
-
-
-        .sidebar { width: 250px; background: var(--side); padding: 20px; border-right: 1px solid #1e293b; display: flex; flex-direction: column; flex-shrink: 0; box-sizing: border-box; }
-        <div class="nav-item" onclick="show('loa', this)">✈️ Manage LOA</div>
-
-        .logo { font-weight: bold; font-size: 1.2rem; margin-bottom: 10px; color: var(--accent); }
-
-        .nav-item { padding: 12px; border-radius: 8px; color: var(--text); cursor: pointer; transition: 0.2s; margin-bottom: 5px; }
-
+        body { margin: 0; display: flex; height: 100vh; background: var(--bg); color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        /* Sidebar Styles */
+        .sidebar { width: 260px; background: var(--bg); padding: 15px; display: flex; flex-direction: column; border-right: 1px solid #1e293b; }
+        .demo-banner { background: var(--demo-gold); color: black; padding: 8px; border-radius: 6px; font-weight: bold; font-size: 12px; margin-bottom: 20px; text-align: center; }
+        .owner-label { color: var(--text); font-size: 14px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .nav-item { padding: 10px 15px; border-radius: 8px; color: var(--text); cursor: pointer; transition: 0.2s; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; font-size: 14px; }
         .nav-item:hover { background: #1e293b; color: white; }
-
         .nav-item.active { background: var(--accent); color: white; }
+        .view-site { margin-top: auto; color: #2dd4bf; border-top: 1px solid #1e293b; padding-top: 20px; text-decoration: none; display: flex; align-items: center; gap: 10px; font-size: 14px; }
 
-        
-
-        .main { flex: 1; padding: 40px; overflow-y: auto; }
-
-        .card { background: #1e293b; padding: 25px; border-radius: 12px; max-width: 600px; display: none; border: 1px solid #334155; margin-bottom: 20px; }
-
+        /* Main Content */
+        .main { flex: 1; padding: 60px; display: flex; flex-direction: column; align-items: flex-start; }
+        .card { background: #1a2236; padding: 30px; border-radius: 12px; width: 100%; max-width: 600px; display: none; border: 1px solid #2d3748; }
         .card.active { display: block; }
-
         
-
-        input, textarea, select { width: 100%; padding: 12px; margin: 10px 0; background: #0b1120; border: 1px solid #334155; color: white; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-
-        button { background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; transition: 0.3s; }
-
-        button:hover { opacity: 0.9; }
-
-        button:disabled { background: #475569; cursor: not-allowed; }
-
+        h2 { margin-top: 0; font-size: 24px; margin-bottom: 8px; }
+        .subtitle { color: var(--text); font-size: 14px; margin-bottom: 25px; }
         
-
-        .req-card { background: #0b1120; padding: 15px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 15px; }
-
-        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
-
-        .btn-approve { background: #10b981; flex: 1; }
-
-        .btn-deny { background: #ef4444; flex: 1; }
-
-
-
-        @media (max-width: 768px) {
-
-            body { flex-direction: column; }
-
-            .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid #1e293b; }
-
-            .main { padding: 20px; }
-
+        input, textarea, select { 
+            width: 100%; padding: 14px; margin-bottom: 15px; background: var(--input); 
+            border: 1px solid #334155; color: white; border-radius: 6px; box-sizing: border-box; font-size: 15px; 
         }
+        textarea { resize: none; }
+        
+        .btn-primary { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; font-size: 15px; transition: 0.3s; }
+        .btn-primary:hover { filter: brightness(1.1); }
 
+        .req-card { background: var(--input); padding: 15px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 15px; }
     </style>
-
 </head>
-
 <body>
-
     <div class="sidebar">
-
-        <div class="demo-notice">⚠️ Demo Environment</div>
-
-        <div class="logo">🛡️ Owner Panel</div>
-
+        <div class="demo-banner">⚠️ DEMO ENVIRONMENT</div>
+        <div class="owner-label">🛡️ Owner Panel</div>
+        
         <div class="nav-item active" onclick="show('ann', this)">📢 Announcement</div>
-
         <div class="nav-item" onclick="show('approvals', this)">📩 Pending Requests</div>
-
         <div class="nav-item" onclick="show('staff', this)">👥 Add Staff</div>
-
+        <div class="nav-item" onclick="show('loa', this)">✈️ Manage LOA</div>
         <div class="nav-item" onclick="show('strike', this)">⚠️ Issue Strike</div>
-
-        <div class="nav-item" style="color: #10b981; margin-top: 20px;" onclick="window.open('../view/', '_blank')">🌐 View Public Site</div>
-
+        
+        <a href="#" class="view-site">🌐 View Public Site</a>
     </div>
-
-
 
     <div class="main">
-
         <div id="ann" class="card active">
-
             <h2>Post Announcement</h2>
-
-            <p style="color: var(--text); font-size: 14px;">Updates here will appear on the public logs page.</p>
-
+            <div class="subtitle">Updates here will appear on the public logs page.</div>
             <input type="text" id="mType" placeholder="Subject">
-
-            <textarea id="mText" rows="5" placeholder="Message content..."></textarea>
-
-            <button id="annBtn" onclick="handleAnnounce()">Publish Announcement</button>
-
+            <textarea id="mText" rows="6" placeholder="Message content..."></textarea>
+            <button class="btn-primary" onclick="handleAnnounce()">Publish Announcement</button>
         </div>
-
-
 
         <div id="approvals" class="card">
-
             <h2>Pending Staff Actions</h2>
-
+            <div class="subtitle">Approve or deny submitted requests.</div>
             <div id="requestList">Loading requests...</div>
-
         </div>
-
-
 
         <div id="staff" class="card">
-
-            <h2>Add New Staff Member</h2>
-
+            <h2>Add Staff</h2>
+            <div class="subtitle">Manually add a member to the staff roster.</div>
             <input type="text" id="sName" placeholder="Username">
-
-            <input type="text" id="sRole" placeholder="Rank/Position">
-
-            <button id="staffBtn" onclick="handleStaff()">Save Staff Member</button>
-
+            <input type="text" id="sRole" placeholder="Rank">
+            <button class="btn-primary" onclick="handleStaff()">Add Member</button>
         </div>
 
-<div id="loa" class="card">
-    <h2>Manage Leave of Absence</h2>
-    <input type="text" id="lName" placeholder="Staff Username">
-    <div style="display: flex; gap: 10px;">
-        <input type="text" id="lStart" placeholder="Start Date">
-        <input type="text" id="lEnd" placeholder="End Date">
-    </div>
-    <textarea id="lReason" placeholder="Reason for leave..."></textarea>
-    <button style="background: #f59e0b; color: #000;" onclick="handleLOA()">Authorize LOA</button>
-</div>
+        <div id="loa" class="card">
+            <h2>Manage LOA</h2>
+            <div class="subtitle">Set a staff member on Leave of Absence.</div>
+            <input type="text" id="lName" placeholder="Staff Username">
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="lStart" placeholder="Start Date">
+                <input type="text" id="lEnd" placeholder="End Date">
+            </div>
+            <textarea id="lReason" rows="3" placeholder="Reason for leave..."></textarea>
+            <button class="btn-primary" style="background: var(--demo-gold); color: black;" onclick="handleLOA()">Authorize LOA</button>
+        </div>
 
         <div id="strike" class="card">
-
             <h2>Issue Strike</h2>
-
+            <div class="subtitle">Log disciplinary action against a staff member.</div>
             <input type="text" id="stName" placeholder="Staff Username">
-
             <select id="stLvl">
-
-                <option value="Verbal Warning">Verbal Warning</option>
-
                 <option value="Warning">Warning</option>
-
-                <option value="S1">Strike 1</option>
-
-                <option value="S2">Strike 2</option>
-
-                <option value="S3">Strike 3</option>
-
+                <option value="Strike 1">Strike 1</option>
+                <option value="Strike 2">Strike 2</option>
+                <option value="Strike 3">Strike 3</option>
             </select>
-
-            <textarea id="stReason" placeholder="Reason for disciplinary action..."></textarea>
-
-            <button id="strikeBtn" style="background: #ef4444;" onclick="handleStrike()">Confirm & Log Strike</button>
-
+            <textarea id="stReason" placeholder="Reason..."></textarea>
+            <button class="btn-primary" style="background: #ef4444;" onclick="handleStrike()">Issue Strike</button>
         </div>
-
     </div>
 
-
-
     <script>
-
-        const API = 'https://script.google.com/macros/s/AKfycbyGipapObdry9qy39Zj1vY2_gRKRLm9KIDNqclRishFkhaBAutKVlcTYuuVPwnIpTwvyQ/exec';
-
-
+        const API = 'YOUR_GOOGLE_APPS_SCRIPT_URL';
 
         function show(id, el) {
-
             document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
-
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-
             document.getElementById(id).classList.add('active');
-
             el.classList.add('active');
-
             if(id === 'approvals') loadRequests();
-
         }
-
-
 
         async function apiPost(payload) {
-
             return fetch(API, {
-
                 method: 'POST',
-
                 mode: 'no-cors',
-
                 headers: { 'Content-Type': 'application/json' },
-
                 body: JSON.stringify(payload)
-
             });
-
         }
 
-
+        async function handleLOA() {
+            const data = {
+                sheet: 'loa',
+                values: [
+                    document.getElementById('lName').value,
+                    document.getElementById('lStart').value,
+                    document.getElementById('lEnd').value,
+                    document.getElementById('lReason').value,
+                    new Date().toLocaleDateString()
+                ]
+            };
+            await apiPost(data);
+            alert("LOA Logged!");
+            location.reload();
+        }
 
         async function handleAnnounce() {
-
-            const btn = document.getElementById('annBtn');
-
-            const data = {
-
-                sheet: 'announcements',
-
-                values: [document.getElementById('mType').value, document.getElementById('mText').value, new Date().toLocaleString()]
-
-            };
-
-            btn.disabled = true; btn.innerText = "Publishing...";
-
-            await apiPost(data);
-
-            alert("Announcement Live!");
-
-            location.reload();
-
+            const data = { sheet: 'announcements', values: [document.getElementById('mType').value, document.getElementById('mText').value, new Date().toLocaleString()] };
+            await apiPost(data); alert("Announcement Live!"); location.reload();
         }
-
-
 
         async function handleStaff() {
-
-            const btn = document.getElementById('staffBtn');
-
-            const data = {
-
-                sheet: 'staff',
-
-                values: [document.getElementById('sName').value, document.getElementById('sRole').value, new Date().toLocaleDateString()]
-
-            };
-
-            btn.disabled = true; btn.innerText = "Saving...";
-
-            await apiPost(data);
-
-            alert("Staff Member Added!");
-
-            location.reload();
-
+            const data = { sheet: 'staff', values: [document.getElementById('sName').value, document.getElementById('sRole').value, new Date().toLocaleDateString()] };
+            await apiPost(data); alert("Staff Added!"); location.reload();
         }
-
-async function handleLOA() {
-    const data = {
-        sheet: 'loa',
-        values: [
-            document.getElementById('lName').value,
-            document.getElementById('lStart').value,
-            document.getElementById('lEnd').value,
-            document.getElementById('lReason').value
-        ]
-    };
-    await apiPost(data);
-    alert("LOA Logged!");
-    location.reload();
-}
 
         async function handleStrike() {
-
-            const btn = document.getElementById('strikeBtn');
-
-            const data = {
-
-                sheet: 'strikes',
-
-                values: [document.getElementById('stName').value, document.getElementById('stLvl').value, document.getElementById('stReason').value, new Date().toLocaleString()]
-
-            };
-
-            btn.disabled = true; btn.innerText = "Logging...";
-
-            await apiPost(data);
-
-            alert("Strike Issued.");
-
-            location.reload();
-
+            const data = { sheet: 'strikes', values: [document.getElementById('stName').value, document.getElementById('stLvl').value, document.getElementById('stReason').value, new Date().toLocaleString()] };
+            await apiPost(data); alert("Strike Logged."); location.reload();
         }
-
-
 
         async function loadRequests() {
-
             const container = document.getElementById('requestList');
-
-            container.innerHTML = "Fetching pending tasks...";
-
+            container.innerHTML = "Fetching...";
             try {
-
                 const res = await fetch(API + '?sheet=requests');
-
                 const data = await res.json();
-
                 const pending = data.filter(r => String(r.status).toUpperCase() === "PENDING");
-
-
-
-                if (!pending.length) {
-
-                    container.innerHTML = "<p style='color: #64748b; text-align: center; margin-top: 20px;'>No pending requests.</p>";
-
-                    return;
-
-                }
-
-
-
+                if (!pending.length) { container.innerHTML = "No pending requests."; return; }
                 container.innerHTML = pending.map(r => `
-
                     <div class="req-card">
-
-                        <div style="font-size: 10px; color: var(--accent); font-weight: bold;">${r.type}</div>
-
-                        <h3 style="margin: 5px 0;">${r.name}</h3>
-
-                        <p style="font-size: 14px; color: #94a3b8; margin: 0;">${r.reason}</p>
-
-                        <div class="btn-group">
-
-                            <button class="btn-approve" onclick="updateReq('${r.name}', 'APPROVED')">Approve</button>
-
-                            <button class="btn-deny" onclick="updateReq('${r.name}', 'DENIED')">Deny</button>
-
-                        </div>
-
+                        <small>${r.type}</small>
+                        <h3>${r.name}</h3>
+                        <p>${r.reason}</p>
+                        <button style="background:#10b981; width:auto; padding:8px 15px; margin-right:5px" onclick="updateReq('${r.name}', 'APPROVED')">Approve</button>
+                        <button style="background:#ef4444; width:auto; padding:8px 15px;" onclick="updateReq('${r.name}', 'DENIED')">Deny</button>
                     </div>
-
                 `).join('');
-
-            } catch (e) { 
-
-                container.innerHTML = "<p style='color: #ef4444;'>Error connecting to database.</p>"; 
-
-            }
-
+            } catch (e) { container.innerHTML = "Error loading requests."; }
         }
-
-
 
         async function updateReq(name, status) {
-
-            if(!confirm(`Set status to ${status}?`)) return;
-
-            await apiPost({
-
-                sheet: 'requests',
-
-                action: 'update',
-
-                name: name,
-
-                status: status
-
-            });
-
-            alert("Request processed.");
-
-            loadRequests();
-
+            await apiPost({ sheet: 'requests', action: 'update', name: name, status: status });
+            alert("Updated."); loadRequests();
         }
-
     </script>
-
 </body>
-
 </html>
