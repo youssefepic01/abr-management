@@ -31,6 +31,7 @@
         <div class="logo">📋 Public Logs</div>
         <div class="nav-item active" onclick="showSection('announcements', this)">📢 Announcements</div>
         <div class="nav-item" onclick="showSection('staffList', this)">👥 Staff Team</div>
+        <div class="nav-item" onclick="showSection('loaList', this)">✈️ Staff on LOA</div>
         <div class="nav-item" onclick="showSection('strikeLogs', this)">⚖️ Strike Logs</div>
     </div>
     <div class="main">
@@ -42,6 +43,12 @@
             <h1>Staff Team</h1>
             <div class="table-wrap">
                 <table><thead><tr><th>Name</th><th>Rank</th></tr></thead><tbody id="staffContent"></tbody></table>
+            </div>
+        </div>
+        <div id="loaList" class="section">
+            <h1>Staff on LOA</h1>
+            <div class="table-wrap">
+                <table><thead><tr><th>Name</th><th>Start Date</th><th>End Date</th><th>Reason</th></tr></thead><tbody id="loaContent"></tbody></table>
             </div>
         </div>
         <div id="strikeLogs" class="section">
@@ -69,7 +76,7 @@
                 document.getElementById('annContent').innerHTML = aD.length ? aD.reverse().map(i => `
                     <div class="announcement-card">
                         <h3>${i.type || 'Announcement'}</h3>
-                        <p>${i.message || i.content || ''}</p>
+                        <p>${i.message || i.content || i.text || ''}</p>
                         <small style="color: #64748b">${i.date || ''}</small>
                     </div>`).join('') : "No announcements yet.";
 
@@ -79,11 +86,17 @@
                 document.getElementById('staffContent').innerHTML = sD.length ? sD.map(i => `
                     <tr><td>${i.name}</td><td>${i.role}</td></tr>`).join('') : "<tr><td colspan='2'>No staff found.</td></tr>";
 
-                // 3. Load Strikes
+                // 3. Load LOA
+                const l = await fetch(API + '?sheet=loa');
+                const lD = await l.json();
+                document.getElementById('loaContent').innerHTML = lD.length ? lD.map(i => `
+                    <tr><td>${i.name}</td><td>${i.start_date || i.start}</td><td>${i.end_date || i.end}</td><td>${i.reason}</td></tr>`).join('') : "<tr><td colspan='4'>No staff currently on LOA.</td></tr>";
+
+                // 4. Load Strikes
                 const st = await fetch(API + '?sheet=strikes');
                 const stD = await st.json();
                 document.getElementById('strikeContent').innerHTML = stD.length ? stD.reverse().map(i => `
-                    <tr><td>${i.name}</td><td>${i.strike_level}</td><td>${i.reason}</td></tr>`).join('') : "<tr><td colspan='3'>No logs found.</td></tr>";
+                    <tr><td>${i.name}</td><td>${i.strike_level || i.level}</td><td>${i.reason}</td></tr>`).join('') : "<tr><td colspan='3'>No logs found.</td></tr>";
 
             } catch (e) {
                 console.error(e);
