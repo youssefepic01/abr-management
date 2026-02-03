@@ -12,57 +12,46 @@
         .nav-item:hover { background: #1e293b; color: white; }
         .nav-item.active { background: var(--accent); color: white; }
         .main { flex: 1; padding: 40px; overflow-y: auto; }
-        .card { background: #1e293b; padding: 25px; border-radius: 12px; max-width: 600px; border: 1px solid #334155; display: none; }
+        .card { background: #1e293b; padding: 25px; border-radius: 12px; max-width: 600px; display: none; border: 1px solid #334155; }
         .card.active { display: block; }
         input, textarea, select { width: 100%; padding: 12px; margin: 10px 0; background: #0b1120; border: 1px solid #334155; color: white; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
         button { background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; }
         
-        @media (max-width: 768px) {
-            body { flex-direction: column; }
-            .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid #1e293b; box-sizing: border-box; }
-            .main { padding: 20px; }
-        }
+        /* Table Styles for LOA View */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { text-align: left; color: var(--accent); font-size: 12px; text-transform: uppercase; padding-bottom: 10px; }
+        td { padding: 8px 0; border-bottom: 1px solid #334155; font-size: 14px; }
 
         .demo-banner {
-    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
-    color: #000;
-    padding: 10px;
-    border-radius: 8px;
-    font-weight: 800;
-    font-size: 12px;
-    margin-bottom: 25px;
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    animation: pulse-glow 2s infinite;
-}
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            color: #000; padding: 10px; border-radius: 8px; font-weight: 800; font-size: 12px;
+            margin-bottom: 25px; text-align: center; text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: pulse-glow 2s infinite;
+        }
 
-@keyframes pulse-glow {
-    0% { box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); }
-    50% { box-shadow: 0 4px 25px rgba(245, 158, 11, 0.5); }
-    100% { box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); }
-}
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); }
+            50% { box-shadow: 0 4px 25px rgba(245, 158, 11, 0.5); }
+            100% { box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); }
+        }
     </style>
 </head>
 <body>
-     <div class="sidebar">
-    <div class="demo-banner">
-        <span style="margin-right: 5px;">⚠️</span> Demo Environment
-    </div>
-         
-</div>
     <div class="sidebar">
+        <div class="demo-banner">⚠️ DEMO ENVIRONMENT</div>
         <div class="logo">👮 Leadership</div>
-        <div id="navStrike" class="nav-item active" onclick="showTab('strikeTab', this)">⚖️ Issue Strike</div>
-        <div id="navRequest" class="nav-item" onclick="showTab('requestTab', this)">📩 Request Action</div>
-        <div class="nav-item" onclick="window.location.href='/view/'">📋 View Database</div>
+        <div class="nav-item active" onclick="showTab('strikeTab', this)">⚖️ Issue Strike</div>
+        <div class="nav-item" onclick="showTab('requestTab', this)">📩 Request Action</div>
+        <div class="nav-item" onclick="showTab('loaViewTab', this)">✈️ View LOA List</div>
+        <a href="INSERT_YOUR_PUBLIC_SITE_URL_HERE" style="text-decoration:none; margin-top: auto;">
+            <div class="nav-item">📋 Public Site</div>
+        </a>
     </div>
 
     <div class="main">
         <div id="strikeTab" class="card active">
-            <h2>Issue Staff punishment</h2>
+            <h2>Issue Staff Punishment</h2>
             <input type="text" id="target" placeholder="Staff Username">
             <select id="lvl">
                 <option>Verbal Warning</option>
@@ -70,15 +59,13 @@
                 <option>S1</option>
                 <option>S2</option>
                 <option>S3</option>
-                <option>S4</option>
             </select>
             <textarea id="res" rows="4" placeholder="Reason..."></textarea>
             <button id="subBtn" onclick="sendStrike()">SUBMIT STRIKE</button>
         </div>
 
         <div id="requestTab" class="card">
-            <h2>Request Action (Owner Approval)</h2>
-            <p style="color: #94a3b8; font-size: 0.8rem; margin-top: -10px;">Requires Owner review</p>
+            <h2>Request Action</h2>
             <input type="text" id="reqTarget" placeholder="Staff Username">
             <select id="reqType">
                 <option value="Demotion">Demotion</option>
@@ -87,70 +74,51 @@
             <textarea id="reqRes" rows="4" placeholder="Reason for this request..."></textarea>
             <button id="reqBtn" onclick="sendRequest()" style="background: #ec4899;">SEND REQUEST</button>
         </div>
+
+        <div id="loaViewTab" class="card">
+            <h2>Staff on LOA</h2>
+            <div id="loaList">Loading LOA data...</div>
+        </div>
     </div>
 
     <script>
-        // YOUR NEW GOOGLE SCRIPT URL
-        const API = 'https://script.google.com/macros/s/AKfycbyGipapObdry9qy39Zj1vY2_gRKRLm9KIDNqclRishFkhaBAutKVlcTYuuVPwnIpTwvyQ/exec';
+        const API_POST = 'https://script.google.com/macros/s/AKfycbyGipapObdry9qy39Zj1vY2_gRKRLm9KIDNqclRishFkhaBAutKVlcTYuuVPwnIpTwvyQ/exec';
+        const SHEETDB = 'https://sheetdb.io/api/v1/nsqoeik98h24t';
 
         function showTab(tabId, el) {
             document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             el.classList.add('active');
+            if(tabId === 'loaViewTab') loadLOA();
+        }
+
+        async function loadLOA() {
+            const container = document.getElementById('loaList');
+            try {
+                const res = await fetch(SHEETDB + '?sheet=loa');
+                const data = await res.json();
+                if(!data.length) { container.innerHTML = "No one is currently on LOA."; return; }
+                
+                let html = `<table><tr><th>Name</th><th>Until</th><th>Reason</th></tr>`;
+                data.forEach(item => {
+                    html += `<tr><td>${item.name}</td><td>${item.end_date || item.end}</td><td>${item.reason}</td></tr>`;
+                });
+                html += `</table>`;
+                container.innerHTML = html;
+            } catch (e) { container.innerHTML = "Error loading LOA data."; }
         }
 
         async function sendStrike() {
-            const btn = document.getElementById('subBtn');
-            btn.innerText = "Saving...";
-            
-            const payload = {
-                sheet: 'strikes', // Make sure your Google Sheet tab is named 'strikes'
-                values: [
-                    document.getElementById('target').value,
-                    document.getElementById('lvl').value,
-                    document.getElementById('res').value,
-                    new Date().toLocaleString()
-                ]
-            };
-
-            fetch(API, {
-                method: 'POST',
-                mode: 'no-cors', // Bypasses the Error message
-                body: JSON.stringify(payload)
-            });
-
-            setTimeout(() => {
-                alert("Strike/Warning Logged!");
-                location.reload();
-            }, 1000);
+            const payload = { sheet: 'strikes', values: [document.getElementById('target').value, document.getElementById('lvl').value, document.getElementById('res').value, new Date().toLocaleString()] };
+            fetch(API_POST, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+            alert("Strike Logged!"); location.reload();
         }
 
         async function sendRequest() {
-            const btn = document.getElementById('reqBtn');
-            btn.innerText = "Sending...";
-
-            const payload = {
-                sheet: 'requests', // Make sure your Google Sheet tab is named 'requests'
-                values: [
-                    document.getElementById('reqTarget').value,
-                    document.getElementById('reqType').value,
-                    document.getElementById('reqRes').value,
-                    "PENDING",
-                    new Date().toLocaleString()
-                ]
-            };
-
-            fetch(API, {
-                method: 'POST',
-                mode: 'no-cors', // Bypasses the Error message
-                body: JSON.stringify(payload)
-            });
-
-            setTimeout(() => {
-                alert("Request sent to Ownership!");
-                location.reload();
-            }, 1000);
+            const payload = { sheet: 'requests', values: [document.getElementById('reqTarget').value, document.getElementById('reqType').value, document.getElementById('reqRes').value, "PENDING", new Date().toLocaleString()] };
+            fetch(API_POST, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+            alert("Request sent!"); location.reload();
         }
     </script>
 </body>
