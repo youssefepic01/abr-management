@@ -35,6 +35,15 @@
             50% { box-shadow: 0 4px 25px rgba(245, 158, 11, 0.5); }
             100% { box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); }
         }
+
+        /* MOBILE FIX */
+        @media (max-width: 768px) {
+            body { flex-direction: column; height: auto; }
+            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #1e293b; box-sizing: border-box; }
+            .main { padding: 20px; }
+            .card { max-width: 100%; }
+            #loaList { overflow-x: auto; }
+        }
     </style>
 </head>
 <body>
@@ -44,7 +53,7 @@
         <div class="nav-item active" onclick="showTab('strikeTab', this)">⚖️ Issue Strike</div>
         <div class="nav-item" onclick="showTab('requestTab', this)">📩 Request Action</div>
         <div class="nav-item" onclick="showTab('loaViewTab', this)">✈️ View LOA List</div>
-        <a href="INSERT_YOUR_PUBLIC_SITE_URL_HERE" style="text-decoration:none; margin-top: auto;">
+        <a href="../view/index.html" style="text-decoration:none; margin-top: auto;">
             <div class="nav-item">📋 Public Site</div>
         </a>
     </div>
@@ -59,6 +68,8 @@
                 <option>S1</option>
                 <option>S2</option>
                 <option>S3</option>
+                <option>S4</option>
+                <option>S5</option>
             </select>
             <textarea id="res" rows="4" placeholder="Reason..."></textarea>
             <button id="subBtn" onclick="sendStrike()">SUBMIT STRIKE</button>
@@ -95,7 +106,7 @@
         async function loadLOA() {
             const container = document.getElementById('loaList');
             try {
-                const res = await fetch(SHEETDB + '?sheet=loa');
+                const res = await fetch(API_POST + '?sheet=loa');
                 const data = await res.json();
                 if(!data.length) { container.innerHTML = "No one is currently on LOA."; return; }
                 
