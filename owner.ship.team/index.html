@@ -4,7 +4,7 @@
     <title>RP Admin | Ownership</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        :root { --bg: #0b1120; --side: #111827; --accent: #3b82f6; --text: #94a3b8; --demo: #f59e0b; --loa: #f59e0b; }
+        :root { --bg: #0b1120; --side: #111827; --accent: #3b82f6; --text: #94a3b8; --loa: #f59e0b; }
         body { margin: 0; display: flex; height: 100vh; background: var(--bg); color: white; font-family: sans-serif; }
         
         .sidebar { width: 250px; background: var(--side); padding: 20px; border-right: 1px solid #1e293b; display: flex; flex-direction: column; flex-shrink: 0; box-sizing: border-box; }
@@ -23,12 +23,6 @@
         
         .req-card { background: #0b1120; padding: 15px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 15px; }
         .btn-group { display: flex; gap: 10px; margin-top: 10px; }
-        
-        @media (max-width: 768px) {
-            body { flex-direction: column; }
-            .sidebar { width: 100%; height: auto; border-bottom: 1px solid #1e293b; }
-            .main { padding: 20px; }
-        }
     </style>
 </head>
 <body>
@@ -37,8 +31,7 @@
         <div class="nav-item active" onclick="show('ann', this)">📢 Announcement</div>
         <div class="nav-item" onclick="show('approvals', this)">📩 Pending Requests</div>
         <div class="nav-item" onclick="show('staff', this)">👥 Add Staff</div>
-        <div class="nav-item" onclick="show('loa', this)">✈️ Manage LOA</div>
-        <div class="nav-item" onclick="show('strike', this)">⚠️ Issue Strike</div>
+        <div class="nav-item" onclick="show('loa', this)">✈️ Manage LOA</div> <div class="nav-item" onclick="show('strike', this)">⚠️ Issue Strike</div>
     </div>
 
     <div class="main">
@@ -46,7 +39,7 @@
             <h2>Post Announcement</h2>
             <input type="text" id="mType" placeholder="Subject">
             <textarea id="mText" rows="5" placeholder="Message content..."></textarea>
-            <button id="annBtn" onclick="handleAnnounce()">Publish Announcement</button>
+            <button onclick="handleAnnounce()">Publish Announcement</button>
         </div>
 
         <div id="approvals" class="card">
@@ -58,19 +51,18 @@
             <h2>Add New Staff Member</h2>
             <input type="text" id="sName" placeholder="Username">
             <input type="text" id="sRole" placeholder="Rank/Position">
-            <button id="staffBtn" onclick="handleStaff()">Save Staff Member</button>
+            <button onclick="handleStaff()">Save Staff Member</button>
         </div>
 
         <div id="loa" class="card">
-            <h2>Manage Leave of Absence (LOA)</h2>
-            <p style="color: var(--text); font-size: 13px;">This updates the "Staff on Leave" section on the public site.</p>
+            <h2>Manage Leave of Absence</h2>
             <input type="text" id="lName" placeholder="Staff Username">
             <div style="display: flex; gap: 10px;">
-                <div style="flex:1"><label style="font-size:12px">Start Date</label><input type="date" id="lStart"></div>
-                <div style="flex:1"><label style="font-size:12px">End Date</label><input type="date" id="lEnd"></div>
+                <input type="text" id="lStart" placeholder="Start Date (e.g. 10/05)">
+                <input type="text" id="lEnd" placeholder="End Date (e.g. 15/05)">
             </div>
             <textarea id="lReason" placeholder="Reason for leave..."></textarea>
-            <button id="loaBtn" style="background: var(--loa); color: #000;" onclick="handleLOA()">Authorize LOA</button>
+            <button style="background: var(--loa); color: #000;" onclick="handleLOA()">Authorize LOA</button>
         </div>
 
         <div id="strike" class="card">
@@ -84,12 +76,13 @@
                 <option value="S3">Strike 3</option>
             </select>
             <textarea id="stReason" placeholder="Reason for disciplinary action..."></textarea>
-            <button id="strikeBtn" style="background: #ef4444;" onclick="handleStrike()">Confirm & Log Strike</button>
+            <button style="background: #ef4444;" onclick="handleStrike()">Confirm & Log Strike</button>
         </div>
     </div>
 
     <script>
-        const API = 'https://script.google.com/macros/s/AKfycbyGipapObdry9qy39Zj1vY2_gRKRLm9KIDNqclRishFkhaBAutKVlcTYuuVPwnIpTwvyQ/exec';
+        // Replace with your Google Apps Script Web App URL
+        const API = 'YOUR_APPS_SCRIPT_URL';
 
         function show(id, el) {
             document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
@@ -108,8 +101,8 @@
             });
         }
 
+        // New LOA Function
         async function handleLOA() {
-            const btn = document.getElementById('loaBtn');
             const data = {
                 sheet: 'loa',
                 values: [
@@ -119,13 +112,11 @@
                     document.getElementById('lReason').value
                 ]
             };
-            btn.disabled = true; btn.innerText = "Saving LOA...";
             await apiPost(data);
-            alert("LOA Logged Successfully!");
+            alert("LOA Logged!");
             location.reload();
         }
 
-        // Original functions (Announce, Staff, Strike) remain the same...
         async function handleAnnounce() {
             const data = { sheet: 'announcements', values: [document.getElementById('mType').value, document.getElementById('mText').value, new Date().toLocaleString()] };
             await apiPost(data); alert("Announcement Live!"); location.reload();
@@ -154,8 +145,8 @@
                     <h3>${r.name}</h3>
                     <p>${r.reason}</p>
                     <div class="btn-group">
-                        <button style="background:#10b981" onclick="updateReq('${r.name}', 'APPROVED')">Approve</button>
-                        <button style="background:#ef4444" onclick="updateReq('${r.name}', 'DENIED')">Deny</button>
+                        <button style="background:#10b981; padding: 5px 10px;" onclick="updateReq('${r.name}', 'APPROVED')">Approve</button>
+                        <button style="background:#ef4444; padding: 5px 10px;" onclick="updateReq('${r.name}', 'DENIED')">Deny</button>
                     </div>
                 </div>
             `).join('');
