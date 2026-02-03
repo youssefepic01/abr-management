@@ -22,10 +22,38 @@
             .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid #1e293b; box-sizing: border-box; }
             .main { padding: 20px; }
         }
+
+        .demo-banner {
+    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    color: #000;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 12px;
+    margin-bottom: 25px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+    0% { box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); }
+    50% { box-shadow: 0 4px 25px rgba(245, 158, 11, 0.5); }
+    100% { box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); }
+}
     </style>
 </head>
 <body>
-     <div class="demo-banner">⚠️ DEMO ENVIRONMENT</div>
+     <div class="sidebar">
+    <div class="demo-banner">
+        <span style="margin-right: 5px;">⚠️</span> Demo Environment
+    </div>
+    <div class="nav-item active" onclick="show('ann', this)">📢 Announcement</div>
+    ...
+</div>
     <div class="sidebar">
         <div class="logo">👮 Leadership</div>
         <div id="navStrike" class="nav-item active" onclick="showTab('strikeTab', this)">⚖️ Issue Strike</div>
