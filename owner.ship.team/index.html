@@ -31,6 +31,14 @@
         .btn-primary { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; font-size: 15px; transition: 0.3s; }
         .btn-primary:hover { filter: brightness(1.1); }
         .req-card { background: var(--input); padding: 15px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 15px; }
+
+        /* Mobile Responsive Fix */
+        @media (max-width: 768px) {
+            body { flex-direction: column; height: auto; }
+            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #1e293b; }
+            .main { padding: 20px; }
+            .card { max-width: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -43,8 +51,8 @@
         <div class="nav-item" onclick="show('loa', this)">✈️ Manage LOA</div>
         <div class="nav-item" onclick="show('strike', this)">⚠️ Issue Strike</div>
         <a href="../view/index.html" class="view-site">🌐 View Public Site</a>
-
     </div>
+
     <div class="main">
         <div id="ann" class="card active">
             <h2>Post Announcement</h2>
@@ -53,18 +61,22 @@
             <textarea id="mText" rows="6" placeholder="Message content..."></textarea>
             <button class="btn-primary" onclick="handleAnnounce()">Publish Announcement</button>
         </div>
+
         <div id="approvals" class="card">
             <h2>Pending Staff Actions</h2>
             <div class="subtitle">Approve or deny submitted requests.</div>
             <div id="requestList">Loading requests...</div>
         </div>
+
         <div id="staff" class="card">
             <h2>Add Staff</h2>
             <div class="subtitle">Manually add a member to the staff roster.</div>
             <input type="text" id="sName" placeholder="Username">
+            <input type="text" id="sId" placeholder="User ID (e.g. 5422819)">
             <input type="text" id="sRole" placeholder="Rank">
             <button class="btn-primary" onclick="handleStaff()">Add Member</button>
         </div>
+
         <div id="loa" class="card">
             <h2>Manage LOA</h2>
             <div class="subtitle">Set a staff member on Leave of Absence.</div>
@@ -76,6 +88,7 @@
             <textarea id="lReason" rows="3" placeholder="Reason for leave..."></textarea>
             <button class="btn-primary" style="background: var(--demo-gold); color: black;" onclick="handleLOA()">Authorize LOA</button>
         </div>
+
         <div id="strike" class="card">
             <h2>Issue Strike</h2>
             <div class="subtitle">Log disciplinary action against a staff member.</div>
@@ -85,15 +98,17 @@
                 <option value="Strike 1">Strike 1</option>
                 <option value="Strike 2">Strike 2</option>
                 <option value="Strike 3">Strike 3</option>
-                <option value="Strike 3">Strike 4</option>
-                <option value="Strike 3">Strike 5</option>
+                <option value="Strike 4">Strike 4</option>
+                <option value="Strike 5">Strike 5</option>
             </select>
             <textarea id="stReason" placeholder="Reason..."></textarea>
             <button class="btn-primary" style="background: #ef4444;" onclick="handleStrike()">Issue Strike</button>
         </div>
     </div>
+
     <script>
         const API = 'https://script.google.com/macros/s/AKfycbyGipapObdry9qy39Zj1vY2_gRKRLm9KIDNqclRishFkhaBAutKVlcTYuuVPwnIpTwvyQ/exec';
+        
         function show(id, el) {
             document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -101,6 +116,7 @@
             el.classList.add('active');
             if(id === 'approvals') loadRequests();
         }
+
         async function apiPost(payload) {
             return fetch(API, {
                 method: 'POST',
@@ -109,6 +125,23 @@
                 body: JSON.stringify(payload)
             });
         }
+
+        // FIXED HANDLE STAFF FUNCTION
+        async function handleStaff() {
+            const data = { 
+                sheet: 'staff', 
+                values: [
+                    document.getElementById('sName').value, // Column A: name
+                    document.getElementById('sId').value,   // Column B: id
+                    document.getElementById('sRole').value, // Column C: role
+                    new Date().toLocaleDateString()         // Column D: date_added
+                ] 
+            };
+            await apiPost(data); 
+            alert("Staff Added!"); 
+            location.reload();
+        }
+
         async function handleLOA() {
             const data = {
                 sheet: 'loa',
@@ -124,18 +157,17 @@
             alert("LOA Logged!");
             location.reload();
         }
+
         async function handleAnnounce() {
             const data = { sheet: 'announcements', values: [document.getElementById('mType').value, document.getElementById('mText').value, new Date().toLocaleString()] };
             await apiPost(data); alert("Announcement Live!"); location.reload();
         }
-        async function handleStaff() {
-            const data = { sheet: 'staff', values: [document.getElementById('sName').value, document.getElementById('sRole').value, new Date().toLocaleDateString()] };
-            await apiPost(data); alert("Staff Added!"); location.reload();
-        }
+
         async function handleStrike() {
             const data = { sheet: 'strikes', values: [document.getElementById('stName').value, document.getElementById('stLvl').value, document.getElementById('stReason').value, new Date().toLocaleString()] };
             await apiPost(data); alert("Strike Logged."); location.reload();
         }
+
         async function loadRequests() {
             const container = document.getElementById('requestList');
             container.innerHTML = "Fetching...";
@@ -155,6 +187,7 @@
                 `).join('');
             } catch (e) { container.innerHTML = "Error loading requests."; }
         }
+
         async function updateReq(name, status) {
             await apiPost({ sheet: 'requests', action: 'update', name: name, status: status });
             alert("Updated."); loadRequests();
