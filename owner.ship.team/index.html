@@ -1,188 +1,167 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Owner Panel | Management</title>
+    <title>RP Admin | Ownership</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         :root { 
-            --bg: #0b0e1a; 
-            --side: #111827; 
-            --card-bg: #1e293b; 
-            --accent: #3b82f6; 
+            --bg: #0f172a; 
+            --side: #020617; 
+            --accent: #f43f5e; /* Red accent for Ownership */
             --text: #94a3b8; 
-            --input: #0f172a;
-            --demo-gold: #f59e0b;
+            --card-bg: #1e293b;
+            --success: #10b981;
         }
-        body { margin: 0; display: flex; height: 100vh; background: var(--bg); color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { margin: 0; display: flex; height: 100vh; background: var(--bg); color: white; font-family: 'Inter', sans-serif; }
         
-        /* Sidebar Styles */
-        .sidebar { width: 260px; background: var(--bg); padding: 15px; display: flex; flex-direction: column; border-right: 1px solid #1e293b; }
-        .demo-banner { background: var(--demo-gold); color: black; padding: 8px; border-radius: 6px; font-weight: bold; font-size: 12px; margin-bottom: 20px; text-align: center; }
-        .owner-label { color: var(--text); font-size: 14px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
-        .nav-item { padding: 10px 15px; border-radius: 8px; color: var(--text); cursor: pointer; transition: 0.2s; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; font-size: 14px; }
+        /* Sidebar */
+        .sidebar { width: 250px; background: var(--side); padding: 20px; border-right: 1px solid #334155; display: flex; flex-direction: column; flex-shrink: 0; }
+        .logo { font-weight: bold; font-size: 1.2rem; margin-bottom: 30px; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+        .nav-item { padding: 12px; border-radius: 8px; color: var(--text); cursor: pointer; transition: 0.2s; margin-bottom: 5px; text-decoration: none; display: block; }
         .nav-item:hover { background: #1e293b; color: white; }
         .nav-item.active { background: var(--accent); color: white; }
-        .view-site { margin-top: auto; color: #2dd4bf; border-top: 1px solid #1e293b; padding-top: 20px; text-decoration: none; display: flex; align-items: center; gap: 10px; font-size: 14px; }
-
-        /* Main Content */
-        .main { flex: 1; padding: 60px; display: flex; flex-direction: column; align-items: flex-start; }
-        .card { background: #1a2236; padding: 30px; border-radius: 12px; width: 100%; max-width: 600px; display: none; border: 1px solid #2d3748; }
+        
+        /* Main Area */
+        .main { flex: 1; padding: 40px; overflow-y: auto; }
+        .card { background: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid #334155; display: none; }
         .card.active { display: block; }
         
-        h2 { margin-top: 0; font-size: 24px; margin-bottom: 8px; }
-        .subtitle { color: var(--text); font-size: 14px; margin-bottom: 25px; }
+        /* Tables */
+        h2 { margin-top: 0; margin-bottom: 10px; }
+        .subtitle { color: var(--text); font-size: 0.85rem; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; color: var(--accent); font-size: 12px; padding: 12px; border-bottom: 2px solid #334155; text-transform: uppercase; }
+        td { padding: 12px; border-bottom: 1px solid #334155; font-size: 14px; }
         
-        input, textarea, select { 
-            width: 100%; padding: 14px; margin-bottom: 15px; background: var(--input); 
-            border: 1px solid #334155; color: white; border-radius: 6px; box-sizing: border-box; font-size: 15px; 
-        }
-        textarea { resize: none; }
-        
-        .btn-primary { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; font-size: 15px; transition: 0.3s; }
-        .btn-primary:hover { filter: brightness(1.1); }
+        /* Badges & Buttons */
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; background: #334155; }
+        .status-pending { color: #fbbf24; background: rgba(251, 191, 36, 0.1); }
+        .btn-action { padding: 6px 12px; border-radius: 4px; border: none; cursor: pointer; font-size: 11px; font-weight: bold; margin-right: 5px; }
+        .btn-approve { background: var(--success); color: white; }
+        .btn-deny { background: #ef4444; color: white; }
 
-        .req-card { background: var(--input); padding: 15px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 15px; }
+        .demo-banner {
+            background: #ef4444; color: white; padding: 8px; border-radius: 8px; 
+            font-weight: 800; font-size: 10px; margin-bottom: 25px; text-align: center;
+        }
     </style>
 </head>
 <body>
     <div class="sidebar">
-        <div class="demo-banner">⚠️ DEMO ENVIRONMENT</div>
-        <div class="owner-label">🛡️ Owner Panel</div>
+        <div class="demo-banner">OWNERSHIP CONSOLE</div>
+        <div class="logo">💎 Ownership</div>
         
-        <div class="nav-item active" onclick="show('ann', this)">📢 Announcement</div>
-        <div class="nav-item" onclick="show('approvals', this)">📩 Pending Requests</div>
-        <div class="nav-item" onclick="show('staff', this)">👥 Add Staff</div>
-        <div class="nav-item" onclick="show('loa', this)">✈️ Manage LOA</div>
-        <div class="nav-item" onclick="show('strike', this)">⚠️ Issue Strike</div>
+        <div class="nav-item active" onclick="showTab('requestsTab', this)">📩 Action Requests</div>
+        <div class="nav-item" onclick="showTab('strikesTab', this)">⚖️ Strike History</div>
         
-        <a href="#" class="view-site">🌐 View Public Site</a>
+        <a href="INSERT_PUBLIC_LOGS_LINK" target="_blank" class="nav-item" style="margin-top: auto; border-top: 1px solid #334155; padding-top: 20px;">🌐 Go to Public Site</a>
     </div>
 
     <div class="main">
-        <div id="ann" class="card active">
-            <h2>Post Announcement</h2>
-            <div class="subtitle">Updates here will appear on the public logs page.</div>
-            <input type="text" id="mType" placeholder="Subject">
-            <textarea id="mText" rows="6" placeholder="Message content..."></textarea>
-            <button class="btn-primary" onclick="handleAnnounce()">Publish Announcement</button>
+        <div id="requestsTab" class="card active">
+            <h2>Pending Action Requests</h2>
+            <div class="subtitle">Approve or deny requests submitted by Leadership.</div>
+            <div id="reqLoader">Fetching requests...</div>
+            <table id="reqTable" style="display:none;">
+                <thead>
+                    <tr>
+                        <th>Target Staff</th>
+                        <th>Action</th>
+                        <th>Reasoning</th>
+                        <th>Status</th>
+                        <th>Decision</th>
+                    </tr>
+                </thead>
+                <tbody id="reqContent"></tbody>
+            </table>
         </div>
 
-        <div id="approvals" class="card">
-            <h2>Pending Staff Actions</h2>
-            <div class="subtitle">Approve or deny submitted requests.</div>
-            <div id="requestList">Loading requests...</div>
-        </div>
-
-        <div id="staff" class="card">
-            <h2>Add Staff</h2>
-            <div class="subtitle">Manually add a member to the staff roster.</div>
-            <input type="text" id="sName" placeholder="Username">
-            <input type="text" id="sRole" placeholder="Rank">
-            <button class="btn-primary" onclick="handleStaff()">Add Member</button>
-        </div>
-
-        <div id="loa" class="card">
-            <h2>Manage LOA</h2>
-            <div class="subtitle">Set a staff member on Leave of Absence.</div>
-            <input type="text" id="lName" placeholder="Staff Username">
-            <div style="display: flex; gap: 10px;">
-                <input type="text" id="lStart" placeholder="Start Date">
-                <input type="text" id="lEnd" placeholder="End Date">
-            </div>
-            <textarea id="lReason" rows="3" placeholder="Reason for leave..."></textarea>
-            <button class="btn-primary" style="background: var(--demo-gold); color: black;" onclick="handleLOA()">Authorize LOA</button>
-        </div>
-
-        <div id="strike" class="card">
-            <h2>Issue Strike</h2>
-            <div class="subtitle">Log disciplinary action against a staff member.</div>
-            <input type="text" id="stName" placeholder="Staff Username">
-            <select id="stLvl">
-                <option value="Warning">Warning</option>
-                <option value="Strike 1">Strike 1</option>
-                <option value="Strike 2">Strike 2</option>
-                <option value="Strike 3">Strike 3</option>
-            </select>
-            <textarea id="stReason" placeholder="Reason..."></textarea>
-            <button class="btn-primary" style="background: #ef4444;" onclick="handleStrike()">Issue Strike</button>
+        <div id="strikesTab" class="card">
+            <h2>Global Strike Logs</h2>
+            <div class="subtitle">Review all punishments issued across the department.</div>
+            <div id="strikeLoader">Loading logs...</div>
+            <table id="strikeTable" style="display:none;">
+                <thead>
+                    <tr>
+                        <th>Staff Name</th>
+                        <th>Level</th>
+                        <th>Reason</th>
+                        <th>Date Issued</th>
+                    </tr>
+                </thead>
+                <tbody id="strikeContent"></tbody>
+            </table>
         </div>
     </div>
 
     <script>
-        const API = 'https://script.google.com/macros/s/AKfycbyGipapObdry9qy39Zj1vY2_gRKRLm9KIDNqclRishFkhaBAutKVlcTYuuVPwnIpTwvyQ/exec';
+        const SHEETDB_API = 'https://script.google.com/macros/s/AKfycbyGipapObdry9qy39Zj1vY2_gRKRLm9KIDNqclRishFkhaBAutKVlcTYuuVPwnIpTwvyQ/exec';
 
-        function show(id, el) {
+        function showTab(tabId, el) {
             document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
             el.classList.add('active');
-            if(id === 'approvals') loadRequests();
-        }
-
-        async function apiPost(payload) {
-            return fetch(API, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-        }
-
-        async function handleLOA() {
-            const data = {
-                sheet: 'loa',
-                values: [
-                    document.getElementById('lName').value,
-                    document.getElementById('lStart').value,
-                    document.getElementById('lEnd').value,
-                    document.getElementById('lReason').value,
-                    new Date().toLocaleDateString()
-                ]
-            };
-            await apiPost(data);
-            alert("LOA Logged!");
-            location.reload();
-        }
-
-        async function handleAnnounce() {
-            const data = { sheet: 'announcements', values: [document.getElementById('mType').value, document.getElementById('mText').value, new Date().toLocaleString()] };
-            await apiPost(data); alert("Announcement Live!"); location.reload();
-        }
-
-        async function handleStaff() {
-            const data = { sheet: 'staff', values: [document.getElementById('sName').value, document.getElementById('sRole').value, new Date().toLocaleDateString()] };
-            await apiPost(data); alert("Staff Added!"); location.reload();
-        }
-
-        async function handleStrike() {
-            const data = { sheet: 'strikes', values: [document.getElementById('stName').value, document.getElementById('stLvl').value, document.getElementById('stReason').value, new Date().toLocaleString()] };
-            await apiPost(data); alert("Strike Logged."); location.reload();
+            
+            if(tabId === 'requestsTab') { loadRequests(); }
+            if(tabId === 'strikesTab') { loadStrikes(); }
         }
 
         async function loadRequests() {
-            const container = document.getElementById('requestList');
-            container.innerHTML = "Fetching...";
             try {
-                const res = await fetch(API + '?sheet=requests');
+                const res = await fetch(`${SHEETDB_API}?sheet=requests`);
                 const data = await res.json();
-                const pending = data.filter(r => String(r.status).toUpperCase() === "PENDING");
-                if (!pending.length) { container.innerHTML = "No pending requests."; return; }
-                container.innerHTML = pending.map(r => `
-                    <div class="req-card">
-                        <small>${r.type}</small>
-                        <h3>${r.name}</h3>
-                        <p>${r.reason}</p>
-                        <button style="background:#10b981; width:auto; padding:8px 15px; margin-right:5px" onclick="updateReq('${r.name}', 'APPROVED')">Approve</button>
-                        <button style="background:#ef4444; width:auto; padding:8px 15px;" onclick="updateReq('${r.name}', 'DENIED')">Deny</button>
-                    </div>
+                const content = document.getElementById('reqContent');
+                
+                content.innerHTML = data.map((row, index) => `
+                    <tr>
+                        <td><strong>${row.name || 'N/A'}</strong></td>
+                        <td>${row.type || 'Action'}</td>
+                        <td><small>${row.reason || 'No reason'}</small></td>
+                        <td><span class="status-badge status-pending">${row.status || 'PENDING'}</span></td>
+                        <td>
+                            <button class="btn-action btn-approve" onclick="updateStatus('${row.name}', 'APPROVED')">✔</button>
+                            <button class="btn-action btn-deny" onclick="updateStatus('${row.name}', 'DENIED')">✖</button>
+                        </td>
+                    </tr>
                 `).join('');
-            } catch (e) { container.innerHTML = "Error loading requests."; }
+                
+                document.getElementById('reqLoader').style.display = 'none';
+                document.getElementById('reqTable').style.display = 'table';
+            } catch (e) {
+                document.getElementById('reqLoader').innerText = "Failed to load requests.";
+            }
         }
 
-        async function updateReq(name, status) {
-            await apiPost({ sheet: 'requests', action: 'update', name: name, status: status });
-            alert("Updated."); loadRequests();
+        async function loadStrikes() {
+            try {
+                const res = await fetch(`${SHEETDB_API}?sheet=strikes`);
+                const data = await res.json();
+                const content = document.getElementById('strikeContent');
+                
+                content.innerHTML = data.map(row => `
+                    <tr>
+                        <td><strong>${row.name || 'Unknown'}</strong></td>
+                        <td>${row.level || 'Warning'}</td>
+                        <td>${row.reason || '-'}</td>
+                        <td>${row.date || '-'}</td>
+                    </tr>
+                `).join('');
+                
+                document.getElementById('strikeLoader').style.display = 'none';
+                document.getElementById('strikeTable').style.display = 'table';
+            } catch (e) {
+                document.getElementById('strikeLoader').innerText = "Failed to load logs.";
+            }
         }
+
+        // Simple function to simulate status update
+        function updateStatus(name, decision) {
+            alert(`${decision} for ${name}. (In a real setup, this would trigger a PATCH request to your SheetDB API)`);
+        }
+
+        // Initial Load
+        loadRequests();
     </script>
 </body>
 </html>
