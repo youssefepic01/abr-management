@@ -1,185 +1,254 @@
-
 <!DOCTYPE html>
 <html>
 <head>
-    <title>RP Admin | Leadership</title>
+    <title>Owner Panel | Management</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        :root { --bg: #0b1120; --side: #111827; --accent: #8b5cf6; --text: #94a3b8; --points: #10b981; }
-        body { margin: 0; display: flex; height: 100vh; background: var(--bg); color: white; font-family: sans-serif; }
-        
-        #authOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 10000; }
-        .auth-card { background: var(--side); padding: 30px; border-radius: 12px; border: 1px solid #334155; width: 320px; text-align: center; }
-        
-        .sidebar { width: 250px; background: var(--side); padding: 20px; border-right: 1px solid #1e293b; display: flex; flex-direction: column; flex-shrink: 0; }
-        .logo { font-weight: bold; font-size: 1.2rem; margin-bottom: 30px; color: var(--accent); }
-        .nav-item { padding: 12px; border-radius: 8px; color: var(--text); cursor: pointer; transition: 0.2s; margin-bottom: 5px; text-decoration: none; display: block; }
+        :root { 
+            --bg: #0b0e1a; 
+            --side: #111827; 
+            --card-bg: #1e293b; 
+            --accent: #3b82f6; 
+            --text: #94a3b8; 
+            --input: #0f172a;
+            --demo-gold: #f59e0b;
+        }
+        body { margin: 0; display: flex; height: 100vh; background: var(--bg); color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .sidebar { width: 260px; background: var(--bg); padding: 15px; display: flex; flex-direction: column; border-right: 1px solid #1e293b; }
+        .demo-banner { background: var(--demo-gold); color: black; padding: 8px; border-radius: 6px; font-weight: bold; font-size: 12px; margin-bottom: 20px; text-align: center; }
+        .owner-label { color: var(--text); font-size: 14px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .nav-item { padding: 10px 15px; border-radius: 8px; color: var(--text); cursor: pointer; transition: 0.2s; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; font-size: 14px; }
         .nav-item:hover { background: #1e293b; color: white; }
         .nav-item.active { background: var(--accent); color: white; }
-        
-        .main { flex: 1; padding: 40px; overflow-y: auto; }
-        .card { background: #1e293b; padding: 25px; border-radius: 12px; max-width: 600px; display: none; border: 1px solid #334155; }
+        .view-site { margin-top: auto; color: #2dd4bf; border-top: 1px solid #1e293b; padding-top: 20px; text-decoration: none; display: flex; align-items: center; gap: 10px; font-size: 14px; }
+        .main { flex: 1; padding: 60px; display: flex; flex-direction: column; align-items: flex-start; }
+        .card { background: #1a2236; padding: 30px; border-radius: 12px; width: 100%; max-width: 600px; display: none; border: 1px solid #2d3748; }
         .card.active { display: block; }
+        h2 { margin-top: 0; font-size: 24px; margin-bottom: 8px; }
+        .subtitle { color: var(--text); font-size: 14px; margin-bottom: 25px; }
+        input, textarea, select { width: 100%; padding: 14px; margin-bottom: 15px; background: var(--input); border: 1px solid #334155; color: white; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
+        textarea { resize: none; }
+        .btn-primary { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; font-size: 15px; transition: 0.3s; }
+        .btn-primary:hover { filter: brightness(1.1); }
+        .req-card { background: var(--input); padding: 15px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 15px; }
         
-        label { display: block; margin-top: 15px; font-size: 14px; color: var(--text); }
-        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; background: #0b1120; border: 1px solid #334155; color: white; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        button { background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; }
-        button:hover { opacity: 0.9; }
-
-        .public-btn { border: 1px solid var(--accent); color: var(--accent); background: transparent; margin-top: auto; text-align: center; }
-        .public-btn:hover { background: var(--accent); color: white; }
-
-        @media (max-width: 768px) {
-            body { flex-direction: column; height: auto; }
-            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #1e293b; box-sizing: border-box; }
-            .main { padding: 20px; }
-        }
+        .points-grid { text-align: left; margin: 15px 0; background: var(--input); padding: 15px; border-radius: 8px; border: 1px solid #334155; }
+        .point-option { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; cursor: pointer; font-size: 14px; color: var(--text); }
+        .point-option input { width: auto; margin-bottom: 0; }
     </style>
 </head>
 <body>
-
-    <div id="authOverlay">
-        <div class="auth-card">
-            <h2>Leadership Login</h2>
-            <input type="text" id="authUser" placeholder="Username">
-            <input type="password" id="authPass" placeholder="Password">
-            <button onclick="handleAuth()">LOGIN</button>
-        </div>
-    </div>
-
     <div class="sidebar">
-        <div class="logo">👮 Management</div>
-        <div id="userDisplay" style="font-size: 12px; color: var(--accent); margin-bottom: 20px;">Waiting for login...</div>
-        
-        <div class="nav-item active" onclick="showTab('strikeTab', this)">⚖️ Issue Strike</div>
-        <div class="nav-item" onclick="showTab('pointsTab', this)">⭐ Award Points</div>
-        <div class="nav-item" onclick="showTab('requestTab', this)">📩 Request Action</div>
-        <div class="nav-item" onclick="showTab('loaViewTab', this)">✈️ View LOA List</div>
-
-        <a href="../view/index.html" target="_blank" class="nav-item public-btn">📋 View Public Logs</a>
+        <div class="demo-banner">⚠️ DEMO ENVIRONMENT</div>
+        <div class="owner-label">🛡️ Owner Panel</div>
+        <div class="nav-item active" onclick="show('ann', this)">📢 Announcement</div>
+        <div class="nav-item" onclick="show('approvals', this)">📩 Pending Requests</div>
+        <div class="nav-item" onclick="show('staff', this)">👥 Add Staff</div>
+        <div class="nav-item" onclick="show('points', this)">⭐ Admin Points</div>
+        <div class="nav-item" onclick="show('loa', this)">✈️ Manage LOA</div>
+        <div class="nav-item" onclick="show('strike', this)">⚠️ Issue Strike</div>
+        <a href="../view/index.html" class="view-site">🌐 View Public Site</a>
     </div>
 
     <div class="main">
-        <div id="strikeTab" class="card active">
-            <h2>Issue Staff Punishment</h2>
-            <label>Target Staff:</label>
-            <select id="target" class="staff-select"><option>Loading...</option></select>
-            <label>Punishment Level:</label>
-            <select id="lvl">
-                <option>Verbal Warning</option>
-                <option>Warning</option>
-                <option>S1</option><option>S2</option><option>S3</option>
-            </select>
-            <textarea id="res" rows="4" placeholder="Reason for strike..."></textarea>
-            <button onclick="sendStrike()">SUBMIT STRIKE</button>
+        <div id="ann" class="card active">
+            <h2>Post Announcement</h2>
+            <div class="subtitle">Updates here will appear on the public logs page.</div>
+            <input type="text" id="mType" placeholder="Subject">
+            <textarea id="mText" rows="6" placeholder="Message content..."></textarea>
+            <button class="btn-primary" onclick="handleAnnounce()">Publish Announcement</button>
         </div>
 
-        <div id="pointsTab" class="card">
-            <h2>Award Admin Points</h2>
-            <label>Target Staff:</label>
-            <select id="pointTarget" class="staff-select"><option>Loading...</option></select>
-            <label>Award Amount:</label>
-            <select id="pointAmount">
-                <option value="5">Weekly Requirement (+5)</option>
-                <option value="10">High Activity (+10)</option>
-                <option value="20">Event Hosting (+20)</option>
-                <option value="-10">Minor Infraction (-10)</option>
-            </select>
-            <textarea id="pointReason" rows="2" placeholder="Notes (Optional)"></textarea>
-            <button onclick="sendPoints()" style="background: var(--points);">AWARD POINTS</button>
+        <div id="approvals" class="card">
+            <h2>Pending Staff Actions</h2>
+            <div class="subtitle">Approve or deny submitted requests.</div>
+            <div id="requestList">Loading requests...</div>
         </div>
 
-        <div id="requestTab" class="card">
-            <h2>Request Management Action</h2>
-            <label>Target Staff:</label>
-            <select id="reqTarget" class="staff-select"><option>Loading...</option></select>
-            <label>Action Type:</label>
-            <select id="reqType">
-                <option value="Demotion">Demotion</option>
-                <option value="Firing">Firing</option>
-                <option value="Promotion">Promotion</option>
-            </select>
-            <textarea id="reqRes" rows="4" placeholder="Detailed reason..."></textarea>
-            <button onclick="sendRequest()" style="background: #ec4899;">SEND REQUEST</button>
+        <div id="staff" class="card">
+            <h2>Add Staff</h2>
+            <div class="subtitle">Manually add a member to the staff roster.</div>
+            <input type="text" id="sName" placeholder="Username">
+            <input type="text" id="sRole" placeholder="Rank">
+            <button class="btn-primary" onclick="handleStaff()">Add Member</button>
         </div>
 
-        <div id="loaViewTab" class="card">
-            <h2>Current Staff on LOA</h2>
-            <div id="loaList">Loading list...</div>
-            <button onclick="loadLOA()" style="background: #334155; font-size: 12px;">Refresh List</button>
+        <div id="points" class="card">
+            <h2>Admin Points Tracker</h2>
+            <div class="subtitle">Award points based on activity and behavior.</div>
+            
+            <label>Select Admin</label>
+            <select id="pNameSelect" class="staff-dropdown">
+                <option>Loading staff list...</option>
+            </select>
+            
+            <div class="points-grid">
+                <label class="point-option">
+                    <input type="checkbox" class="p-check" data-pts="10"> Activity in Game (+10)
+                </label>
+                <label class="point-option">
+                    <input type="checkbox" class="p-check" data-pts="5"> Activity in Discord (+5)
+                </label>
+                <label class="point-option">
+                    <input type="checkbox" class="p-check" data-pts="3"> Behavior in Game (+3)
+                </label>
+                <label class="point-option">
+                    <input type="checkbox" class="p-check" data-pts="2"> Behavior in Discord (+2)
+                </label>
+            </div>
+            
+            <button class="btn-primary" style="background: #8b5cf6;" onclick="handlePoints()">Award Points</button>
+        </div>
+
+        <div id="loa" class="card">
+            <h2>Manage LOA</h2>
+            <div class="subtitle">Set a staff member on Leave of Absence.</div>
+            <select id="lNameSelect" class="staff-dropdown">
+                <option>Loading staff list...</option>
+            </select>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="lStart" placeholder="Start Date">
+                <input type="text" id="lEnd" placeholder="End Date">
+            </div>
+            <textarea id="lReason" rows="3" placeholder="Reason for leave..."></textarea>
+            <button class="btn-primary" style="background: var(--demo-gold); color: black;" onclick="handleLOA()">Authorize LOA</button>
+        </div>
+
+        <div id="strike" class="card">
+            <h2>Issue Strike</h2>
+            <div class="subtitle">Log disciplinary action against a staff member.</div>
+            
+            <label>Select Admin</label>
+            <select id="stNameSelect" class="staff-dropdown">
+                <option>Loading staff list...</option>
+            </select>
+
+            <select id="stLvl">
+                <option value="Warning">Warning</option>
+                <option value="Strike 1">Strike 1</option>
+                <option value="Strike 2">Strike 2</option>
+                <option value="Strike 3">Strike 3</option>
+                <option value="Strike 4">Strike 4</option>
+                <option value="Strike 5">Strike 5</option>
+            </select>
+            <textarea id="stReason" placeholder="Reason..."></textarea>
+            <button class="btn-primary" style="background: #ef4444;" onclick="handleStrike()">Issue Strike</button>
         </div>
     </div>
 
     <script>
-        const API_POST = 'https://script.google.com/macros/s/AKfycbyPN_k8nOvCChGhKoRDZzahzw_x1JffS7rw28sIodiWqzxccaR4r_UkgB2osouXKYjF_Q/exec'; 
-        let CURRENT_USER = ""; 
+        const API = 'https://script.google.com/macros/s/AKfycbyGipapObdry9qy39Zj1vY2_gRKRLm9KIDNqclRishFkhaBAutKVlcTYuuVPwnIpTwvyQ/exec';
 
-        async function handleAuth() {
-            const user = document.getElementById('authUser').value;
-            const pass = document.getElementById('authPass').value;
-            if(!user || !pass) return alert("Enter credentials");
+        // Fetch staff names on page load
+        window.onload = loadStaffNames;
 
+        async function loadStaffNames() {
             try {
-                const res = await fetch(`${API_POST}?action=login&user=${user}&pass=${pass}`);
+                const res = await fetch(API + '?sheet=staff');
                 const data = await res.json();
-                if(data.status === "success") {
-                    CURRENT_USER = user;
-                    document.getElementById('userDisplay').innerText = "Logged in as: " + user;
-                    document.getElementById('authOverlay').style.display = 'none';
-                    loadStaffDropdowns();
-                } else {
-                    alert("Access Denied");
-                }
-            } catch(e) { alert("Connection Error"); }
+                
+                // Extract names (Assuming Name is in the first column)
+                // We skip the header row if it exists
+                const names = data.map(row => row[0] || row.name).filter(n => n && n !== "Name" && n !== "Username");
+
+                const dropdowns = document.querySelectorAll('.staff-dropdown');
+                dropdowns.forEach(select => {
+                    select.innerHTML = names.map(n => `<option value="${n}">${n}</option>`).join('');
+                });
+            } catch (e) {
+                console.error("Staff load error:", e);
+                document.querySelectorAll('.staff-dropdown').forEach(s => s.innerHTML = '<option>Error loading staff</option>');
+            }
         }
 
-        async function loadStaffDropdowns() {
-            try {
-                const res = await fetch(API_POST + '?sheet=staff');
-                const staffData = await res.json();
-                const dropdowns = document.querySelectorAll('.staff-select');
-                let options = staffData.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
-                dropdowns.forEach(select => select.innerHTML = options);
-            } catch (e) { console.error("Dropdown error", e); }
-        }
-
-        function showTab(tabId, el) {
+        function show(id, el) {
             document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
+            document.getElementById(id).classList.add('active');
             el.classList.add('active');
-            if(tabId === 'loaViewTab') loadLOA();
+            if(id === 'approvals') loadRequests();
         }
 
-        async function sendStrike() {
-            const payload = { sheet: 'strikes', values: [document.getElementById('target').value, document.getElementById('lvl').value, document.getElementById('res').value, new Date().toLocaleString(), CURRENT_USER] };
-            await fetch(API_POST, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            alert("Strike Logged Successfully!");
+        async function apiPost(payload) {
+            payload.password = localStorage.getItem('gatekeeper_key');
+            return fetch(API, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
         }
 
-        async function sendPoints() {
-            const payload = { sheet: 'points', values: [document.getElementById('pointTarget').value, document.getElementById('pointAmount').value, document.getElementById('pointReason').value, new Date().toLocaleString(), CURRENT_USER] };
-            await fetch(API_POST, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            alert("Points Updated!");
+        async function handlePoints() {
+            const name = document.getElementById('pNameSelect').value;
+            const checks = document.querySelectorAll('.p-check');
+            let total = 0;
+            checks.forEach(c => { if(c.checked) total += parseInt(c.dataset.pts); });
+
+            if(total === 0) { alert("Select at least one category."); return; }
+
+            await apiPost({
+                sheet: 'points',
+                values: [name, total, new Date().toLocaleDateString(), "Staff Activity Review"]
+            });
+            alert(`Added ${total} points to ${name}!`);
+            location.reload();
         }
 
-        async function sendRequest() {
-            const payload = { sheet: 'requests', values: [document.getElementById('reqTarget').value, document.getElementById('reqType').value, document.getElementById('reqRes').value, "PENDING", new Date().toLocaleString(), CURRENT_USER] };
-            await fetch(API_POST, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            alert("Request Sent to High Command!");
+        async function handleLOA() {
+            await apiPost({
+                sheet: 'loa',
+                values: [
+                    document.getElementById('lNameSelect').value,
+                    document.getElementById('lStart').value,
+                    document.getElementById('lEnd').value,
+                    document.getElementById('lReason').value,
+                    new Date().toLocaleDateString()
+                ]
+            });
+            alert("LOA Logged!");
+            location.reload();
         }
 
-        async function loadLOA() {
-            const container = document.getElementById('loaList');
+        async function handleAnnounce() {
+            const data = { sheet: 'announcements', values: [document.getElementById('mType').value, document.getElementById('mText').value, new Date().toLocaleString()] };
+            await apiPost(data); alert("Announcement Live!"); location.reload();
+        }
+
+        async function handleStaff() {
+            const data = { sheet: 'staff', values: [document.getElementById('sName').value, document.getElementById('sRole').value, new Date().toLocaleDateString()] };
+            await apiPost(data); alert("Staff Added!"); location.reload();
+        }
+
+        async function handleStrike() {
+            const name = document.getElementById('stNameSelect').value;
+            const data = { sheet: 'strikes', values: [name, document.getElementById('stLvl').value, document.getElementById('stReason').value, new Date().toLocaleString()] };
+            await apiPost(data); alert("Strike Logged."); location.reload();
+        }
+
+        async function loadRequests() {
+            const container = document.getElementById('requestList');
+            container.innerHTML = "Fetching...";
             try {
-                const res = await fetch(API_POST + '?sheet=loa');
+                const res = await fetch(API + '?sheet=requests');
                 const data = await res.json();
-                if(!data.length) { container.innerHTML = "No active LOAs."; return; }
-                let html = `<table><tr><th>Name</th><th>Reason</th></tr>`;
-                data.forEach(i => { html += `<tr><td>${i.name}</td><td>${i.reason}</td></tr>`; });
-                html += `</table>`;
-                container.innerHTML = html;
-            } catch (e) { container.innerHTML = "Error loading LOAs."; }
+                const pending = data.filter(r => String(r.status).toUpperCase() === "PENDING");
+                if (!pending.length) { container.innerHTML = "No pending requests."; return; }
+                container.innerHTML = pending.map(r => `
+                    <div class="req-card">
+                        <small>${r.type}</small>
+                        <h3>${r.name}</h3>
+                        <p>${r.reason}</p>
+                        <button style="background:#10b981; width:auto; padding:8px 15px; margin-right:5px" onclick="updateReq('${r.name}', 'APPROVED')">Approve</button>
+                        <button style="background:#ef4444; width:auto; padding:8px 15px;" onclick="updateReq('${r.name}', 'DENIED')">Deny</button>
+                    </div>
+                `).join('');
+            } catch (e) { container.innerHTML = "Error loading requests."; }
+        }
+
+        async function updateReq(name, status) {
+            await apiPost({ sheet: 'requests', action: 'update', name: name, status: status });
+            alert("Updated."); loadRequests();
         }
     </script>
 </body>
