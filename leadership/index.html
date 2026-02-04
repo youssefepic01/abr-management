@@ -4,96 +4,180 @@
     <title>RP Admin | Leadership</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        :root { --bg: #0b1120; --side: #111827; --accent: #8b5cf6; --text: #94a3b8; }
+        :root { --bg: #0b1120; --side: #111827; --accent: #8b5cf6; --text: #94a3b8; --points: #10b981; }
         body { margin: 0; display: flex; height: 100vh; background: var(--bg); color: white; font-family: sans-serif; }
+        
+        #authOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 10000; }
+        .auth-card { background: var(--side); padding: 30px; border-radius: 12px; border: 1px solid #334155; width: 320px; text-align: center; }
+        
         .sidebar { width: 250px; background: var(--side); padding: 20px; border-right: 1px solid #1e293b; display: flex; flex-direction: column; flex-shrink: 0; }
         .logo { font-weight: bold; font-size: 1.2rem; margin-bottom: 30px; color: var(--accent); }
-        .nav-item { padding: 12px; border-radius: 8px; color: var(--text); cursor: pointer; transition: 0.2s; margin-bottom: 5px; }
+        .nav-item { padding: 12px; border-radius: 8px; color: var(--text); cursor: pointer; transition: 0.2s; margin-bottom: 5px; text-decoration: none; display: block; }
         .nav-item:hover { background: #1e293b; color: white; }
         .nav-item.active { background: var(--accent); color: white; }
+        
         .main { flex: 1; padding: 40px; overflow-y: auto; }
         .card { background: #1e293b; padding: 25px; border-radius: 12px; max-width: 600px; display: none; border: 1px solid #334155; }
         .card.active { display: block; }
-        input, textarea, select { width: 100%; padding: 12px; margin: 10px 0; background: #0b1120; border: 1px solid #334155; color: white; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        button { background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; }
         
-        /* Table Styles for LOA View */
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { text-align: left; color: var(--accent); font-size: 12px; text-transform: uppercase; padding-bottom: 10px; }
-        td { padding: 8px 0; border-bottom: 1px solid #334155; font-size: 14px; }
+        label { display: block; margin-top: 15px; font-size: 14px; color: var(--text); }
+        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; background: #0b1120; border: 1px solid #334155; color: white; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        button { background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; margin-top: 10px; }
+        button:hover { opacity: 0.9; }
 
-        .demo-banner {
-            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
-            color: #000; padding: 10px; border-radius: 8px; font-weight: 800; font-size: 12px;
-            margin-bottom: 25px; text-align: center; text-transform: uppercase; letter-spacing: 1px;
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); border: 1px solid rgba(255, 255, 255, 0.2);
-            animation: pulse-glow 2s infinite;
-        }
+        .public-btn { border: 1px solid var(--accent); color: var(--accent); background: transparent; margin-top: auto; text-align: center; }
+        .public-btn:hover { background: var(--accent); color: white; }
 
-        @keyframes pulse-glow {
-            0% { box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); }
-            50% { box-shadow: 0 4px 25px rgba(245, 158, 11, 0.5); }
-            100% { box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); }
-        }
+        /* Styles for Register Toggle */
+        .auth-toggle { margin-top: 15px; font-size: 13px; color: var(--text); cursor: pointer; text-decoration: underline; }
 
-        /* MOBILE FIX */
         @media (max-width: 768px) {
             body { flex-direction: column; height: auto; }
             .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #1e293b; box-sizing: border-box; }
             .main { padding: 20px; }
-            .card { max-width: 100%; }
-            #loaList { overflow-x: auto; }
         }
     </style>
 </head>
 <body>
+
+    <div id="authOverlay">
+        <div class="auth-card" id="loginBox">
+            <h2>Leadership Login</h2>
+            <input type="text" id="authUser" placeholder="Username">
+            <input type="password" id="authPass" placeholder="Password">
+            <button onclick="handleAuth()">LOGIN</button>
+            <div class="auth-toggle" onclick="toggleAuth(true)">Request New Account</div>
+        </div>
+
+        <div class="auth-card" id="registerBox" style="display: none;">
+            <h2>Account Request</h2>
+            <p style="font-size: 12px; color: var(--text);">Submit for Ownership Approval</p>
+            <input type="text" id="regUser" placeholder="Requested Username">
+            <input type="password" id="regPass" placeholder="Requested Password">
+            <button onclick="handleRegister()" style="background: #0ea5e9;">SUBMIT REQUEST</button>
+            <div class="auth-toggle" onclick="toggleAuth(false)">Back to Login</div>
+        </div>
+    </div>
+
     <div class="sidebar">
-        <div class="demo-banner">⚠️ DEMO ENVIRONMENT</div>
-        <div class="logo">👮 Leadership</div>
+        <div class="logo">👮 Management</div>
+        <div id="userDisplay" style="font-size: 12px; color: var(--accent); margin-bottom: 20px;">Waiting for login...</div>
+        
         <div class="nav-item active" onclick="showTab('strikeTab', this)">⚖️ Issue Strike</div>
+        <div class="nav-item" onclick="showTab('pointsTab', this)">⭐ Award Points</div>
         <div class="nav-item" onclick="showTab('requestTab', this)">📩 Request Action</div>
         <div class="nav-item" onclick="showTab('loaViewTab', this)">✈️ View LOA List</div>
-        <a href="../view/index.html" style="text-decoration:none; margin-top: auto;">
-            <div class="nav-item">📋 Public Site</div>
-        </a>
+
+        <a href="../view/index.html" target="_blank" class="nav-item public-btn">📋 View Public Logs</a>
     </div>
 
     <div class="main">
         <div id="strikeTab" class="card active">
             <h2>Issue Staff Punishment</h2>
-            <input type="text" id="target" placeholder="Staff Username">
+            <label>Target Staff:</label>
+            <select id="target" class="staff-select"><option>Loading...</option></select>
+            <label>Punishment Level:</label>
             <select id="lvl">
                 <option>Verbal Warning</option>
                 <option>Warning</option>
-                <option>S1</option>
-                <option>S2</option>
-                <option>S3</option>
-                <option>S4</option>
-                <option>S5</option>
+                <option>S1</option><option>S2</option><option>S3</option>
             </select>
-            <textarea id="res" rows="4" placeholder="Reason..."></textarea>
-            <button id="subBtn" onclick="sendStrike()">SUBMIT STRIKE</button>
+            <textarea id="res" rows="4" placeholder="Reason for strike..."></textarea>
+            <button onclick="sendStrike()">SUBMIT STRIKE</button>
+        </div>
+
+        <div id="pointsTab" class="card">
+            <h2>Award Admin Points</h2>
+            <label>Target Staff:</label>
+            <select id="pointTarget" class="staff-select"><option>Loading...</option></select>
+            <label>Award Amount:</label>
+            <select id="pointAmount">
+                <option value="5">Weekly Requirement (+5)</option>
+                <option value="10">High Activity (+10)</option>
+                <option value="20">Event Hosting (+20)</option>
+                <option value="-10">Minor Infraction (-10)</option>
+            </select>
+            <textarea id="pointReason" rows="2" placeholder="Notes (Optional)"></textarea>
+            <button onclick="sendPoints()" style="background: var(--points);">AWARD POINTS</button>
         </div>
 
         <div id="requestTab" class="card">
-            <h2>Request Action</h2>
-            <input type="text" id="reqTarget" placeholder="Staff Username">
+            <h2>Request Management Action</h2>
+            <label>Target Staff:</label>
+            <select id="reqTarget" class="staff-select"><option>Loading...</option></select>
+            <label>Action Type:</label>
             <select id="reqType">
                 <option value="Demotion">Demotion</option>
                 <option value="Firing">Firing</option>
+                <option value="Promotion">Promotion</option>
             </select>
-            <textarea id="reqRes" rows="4" placeholder="Reason for this request..."></textarea>
-            <button id="reqBtn" onclick="sendRequest()" style="background: #ec4899;">SEND REQUEST</button>
+            <textarea id="reqRes" rows="4" placeholder="Detailed reason..."></textarea>
+            <button onclick="sendRequest()" style="background: #ec4899;">SEND REQUEST</button>
         </div>
 
         <div id="loaViewTab" class="card">
-            <h2>Staff on LOA</h2>
-            <div id="loaList">Loading LOA data...</div>
+            <h2>Current Staff on LOA</h2>
+            <div id="loaList">Loading list...</div>
+            <button onclick="loadLOA()" style="background: #334155; font-size: 12px;">Refresh List</button>
         </div>
     </div>
 
     <script>
-        const API_POST = 'https://script.google.com/macros/s/AKfycbyGipapObdry9qy39Zj1vY2_gRKRLm9KIDNqclRishFkhaBAutKVlcTYuuVPwnIpTwvyQ/exec';
+        const API_POST = 'https://script.google.com/macros/s/AKfycbyPN_k8nOvCChGhKoRDZzahzw_x1JffS7rw28sIodiWqzxccaR4r_UkgB2osouXKYjF_Q/exec'; 
+        let CURRENT_USER = ""; 
+
+        // Toggle between Login and Register UI
+        function toggleAuth(isRegister) {
+            document.getElementById('loginBox').style.display = isRegister ? 'none' : 'block';
+            document.getElementById('registerBox').style.display = isRegister ? 'block' : 'none';
+        }
+
+        // Send Registration Request to the "pending" sheet
+        async function handleRegister() {
+            const user = document.getElementById('regUser').value;
+            const pass = document.getElementById('regPass').value;
+            if(!user || !pass) return alert("Fill in all fields");
+
+            const payload = { 
+                sheet: 'pending', 
+                values: [user, pass, "PENDING", new Date().toLocaleString()] 
+            };
+
+            try {
+                await fetch(API_POST, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+                alert("Request sent! Ownership will review your account.");
+                toggleAuth(false);
+            } catch(e) { alert("Error sending request."); }
+        }
+
+        async function handleAuth() {
+            const user = document.getElementById('authUser').value;
+            const pass = document.getElementById('authPass').value;
+            if(!user || !pass) return alert("Enter credentials");
+
+            try {
+                const res = await fetch(`${API_POST}?action=login&user=${user}&pass=${pass}`);
+                const data = await res.json();
+                if(data.status === "success") {
+                    CURRENT_USER = user;
+                    document.getElementById('userDisplay').innerText = "Logged in as: " + user;
+                    document.getElementById('authOverlay').style.display = 'none';
+                    loadStaffDropdowns();
+                } else {
+                    alert("Access Denied");
+                }
+            } catch(e) { alert("Connection Error"); }
+        }
+
+        async function loadStaffDropdowns() {
+            try {
+                const res = await fetch(API_POST + '?sheet=staff');
+                const staffData = await res.json();
+                const dropdowns = document.querySelectorAll('.staff-select');
+                let options = staffData.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+                dropdowns.forEach(select => select.innerHTML = options);
+            } catch (e) { console.error("Dropdown error", e); }
+        }
 
         function showTab(tabId, el) {
             document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
@@ -103,32 +187,35 @@
             if(tabId === 'loaViewTab') loadLOA();
         }
 
+        async function sendStrike() {
+            const payload = { sheet: 'strikes', values: [document.getElementById('target').value, document.getElementById('lvl').value, document.getElementById('res').value, new Date().toLocaleString(), CURRENT_USER] };
+            await fetch(API_POST, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+            alert("Strike Logged Successfully!");
+        }
+
+        async function sendPoints() {
+            const payload = { sheet: 'points', values: [document.getElementById('pointTarget').value, document.getElementById('pointAmount').value, document.getElementById('pointReason').value, new Date().toLocaleString(), CURRENT_USER] };
+            await fetch(API_POST, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+            alert("Points Updated!");
+        }
+
+        async function sendRequest() {
+            const payload = { sheet: 'requests', values: [document.getElementById('reqTarget').value, document.getElementById('reqType').value, document.getElementById('reqRes').value, "PENDING", new Date().toLocaleString(), CURRENT_USER] };
+            await fetch(API_POST, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+            alert("Request Sent to High Command!");
+        }
+
         async function loadLOA() {
             const container = document.getElementById('loaList');
             try {
                 const res = await fetch(API_POST + '?sheet=loa');
                 const data = await res.json();
-                if(!data.length) { container.innerHTML = "No one is currently on LOA."; return; }
-                
-                let html = `<table><tr><th>Name</th><th>Until</th><th>Reason</th></tr>`;
-                data.forEach(item => {
-                    html += `<tr><td>${item.name}</td><td>${item.end_date || item.end}</td><td>${item.reason}</td></tr>`;
-                });
+                if(!data.length) { container.innerHTML = "No active LOAs."; return; }
+                let html = `<table style="width:100%; border-collapse: collapse;"><tr><th style="text-align:left; color:var(--accent);">Name</th><th style="text-align:left; color:var(--accent);">Reason</th></tr>`;
+                data.forEach(i => { html += `<tr style="border-bottom: 1px solid #1e293b;"><td style="padding:8px 0;">${i.name}</td><td style="padding:8px 0;">${i.reason}</td></tr>`; });
                 html += `</table>`;
                 container.innerHTML = html;
-            } catch (e) { container.innerHTML = "Error loading LOA data."; }
-        }
-
-        async function sendStrike() {
-            const payload = { sheet: 'strikes', values: [document.getElementById('target').value, document.getElementById('lvl').value, document.getElementById('res').value, new Date().toLocaleString()] };
-            fetch(API_POST, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            alert("Strike Logged!"); location.reload();
-        }
-
-        async function sendRequest() {
-            const payload = { sheet: 'requests', values: [document.getElementById('reqTarget').value, document.getElementById('reqType').value, document.getElementById('reqRes').value, "PENDING", new Date().toLocaleString()] };
-            fetch(API_POST, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            alert("Request sent!"); location.reload();
+            } catch (e) { container.innerHTML = "Error loading LOAs."; }
         }
     </script>
 </body>
