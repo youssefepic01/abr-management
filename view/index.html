@@ -19,6 +19,9 @@
         .table-wrap { overflow-x: auto; border-radius: 8px; }
         .announcement-card { background: #1e293b; padding: 20px; border-radius: 12px; border-left: 4px solid var(--accent); margin-bottom: 15px; }
         
+        /* Point specific style */
+        .point-badge { background: rgba(16, 185, 129, 0.2); color: var(--accent); padding: 4px 10px; border-radius: 20px; font-weight: bold; }
+
         @media (max-width: 768px) {
             body { flex-direction: column; }
             .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid #1e293b; box-sizing: border-box; }
@@ -31,7 +34,7 @@
         <div class="logo">📋 Public Logs</div>
         <div class="nav-item active" onclick="showSection('announcements', this)">📢 Announcements</div>
         <div class="nav-item" onclick="showSection('staffList', this)">👥 Staff Team</div>
-        <div class="nav-item" onclick="showSection('loaList', this)">✈️ Staff on LOA</div>
+        <div class="nav-item" onclick="showSection('pointTracker', this)">⭐ Admin Points</div> <div class="nav-item" onclick="showSection('loaList', this)">✈️ Staff on LOA</div>
         <div class="nav-item" onclick="showSection('strikeLogs', this)">⚖️ Strike Logs</div>
     </div>
     <div class="main">
@@ -39,18 +42,29 @@
             <h1>Latest Announcements</h1>
             <div id="annContent">Loading...</div>
         </div>
+
         <div id="staffList" class="section">
             <h1>Staff Team</h1>
             <div class="table-wrap">
                 <table><thead><tr><th>Name</th><th>Rank</th></tr></thead><tbody id="staffContent"></tbody></table>
             </div>
         </div>
+
+        <div id="pointTracker" class="section">
+            <h1>Admin Points Tracker</h1>
+            <p style="color: var(--text); margin-bottom: 20px;">Current standing of staff activity and behavior points.</p>
+            <div class="table-wrap">
+                <table><thead><tr><th>Admin Name</th><th>Total Points</th></tr></thead><tbody id="pointsContent"></tbody></table>
+            </div>
+        </div>
+
         <div id="loaList" class="section">
             <h1>Staff on LOA</h1>
             <div class="table-wrap">
                 <table><thead><tr><th>Name</th><th>Start Date</th><th>End Date</th><th>Reason</th></tr></thead><tbody id="loaContent"></tbody></table>
             </div>
         </div>
+
         <div id="strikeLogs" class="section">
             <h1>Disciplinary Logs</h1>
             <div class="table-wrap">
@@ -58,8 +72,9 @@
             </div>
         </div>
     </div>
+
     <script>
-        const API = 'https://sheetdb.io/api/v1/nsqoeik98h24t';
+        const API = 'https://sheetdb.io/api/v1/t55fnhgyo2i71';
 
         function showSection(id, el) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -86,13 +101,19 @@
                 document.getElementById('staffContent').innerHTML = sD.length ? sD.map(i => `
                     <tr><td>${i.name}</td><td>${i.role}</td></tr>`).join('') : "<tr><td colspan='2'>No staff found.</td></tr>";
 
-                // 3. Load LOA
+                // 3. Load Points (NEW)
+                const p = await fetch(API + '?sheet=points');
+                const pD = await p.json();
+                document.getElementById('pointsContent').innerHTML = pD.length ? pD.map(i => `
+                    <tr><td>${i.name}</td><td><span class="point-badge">${i.points || 0} pts</span></td></tr>`).join('') : "<tr><td colspan='2'>No points data available.</td></tr>";
+
+                // 4. Load LOA
                 const l = await fetch(API + '?sheet=loa');
                 const lD = await l.json();
                 document.getElementById('loaContent').innerHTML = lD.length ? lD.map(i => `
                     <tr><td>${i.name}</td><td>${i.start_date || i.start}</td><td>${i.end_date || i.end}</td><td>${i.reason}</td></tr>`).join('') : "<tr><td colspan='4'>No staff currently on LOA.</td></tr>";
 
-                // 4. Load Strikes
+                // 5. Load Strikes
                 const st = await fetch(API + '?sheet=strikes');
                 const stD = await st.json();
                 document.getElementById('strikeContent').innerHTML = stD.length ? stD.reverse().map(i => `
